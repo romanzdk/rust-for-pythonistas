@@ -427,6 +427,80 @@ LESSONS.push({
     `,
     hint: 'The error names the variants that are not covered. Copy the shape of the arms that are already there: <code>Direction::East =&gt; println!(...)</code>.',
   },
+  breaks: [
+    `Each variant can carry different data. A Python <code>Enum</code> member is one fixed value. The closest Python is a union of
+      dataclasses, like <code>Circle | Rect</code>.`,
+    `<code>match</code> must cover every case, or it doesn't compile. Python's <code>match</code> silently does nothing when no
+      <code>case</code> fits.`,
+    `Variants are not strings or numbers. There is no built-in <code>.name</code> or <code>.value</code>. Write a
+      <code>match</code> that returns the text, or derive <code>Debug</code> and print with <code>{:?}</code>.`,
+    `You can't loop over an enum. <code>for s in Status:</code> has no built-in Rust version. List the variants in an array
+      yourself.`,
+  ],
+  translate: {
+    py: code`
+      from dataclasses import dataclass
+
+
+      @dataclass
+      class Circle:
+          r: float
+
+
+      @dataclass
+      class Rect:
+          w: float
+          h: float
+
+
+      def area(shape: Circle | Rect) -> float:
+          match shape:
+              case Circle(r=r):
+                  return 3.14 * r * r
+              case Rect(w=w, h=h):
+                  return w * h
+
+
+      for s in [Circle(2.0), Rect(3.0, 4.0)]:
+          print(f"{area(s):.2f}")
+    `,
+    starter: code`
+      enum Shape {
+      }
+
+      fn main() {
+      }
+    `,
+    solution: code`
+      enum Shape {
+          Circle(f64),
+          Rect(f64, f64),
+      }
+
+      impl Shape {
+          fn area(&self) -> f64 {
+              match self {
+                  Shape::Circle(r) => 3.14 * r * r,
+                  Shape::Rect(w, h) => w * h,
+              }
+          }
+      }
+
+      fn main() {
+          let shapes = vec![Shape::Circle(2.0), Shape::Rect(3.0, 4.0)];
+          for s in &shapes {
+              println!("{:.2}", s.area());
+          }
+      }
+    `,
+    expected: code`
+      12.56
+      12.00
+    `,
+    hint: `The two dataclasses are "one or the other", so they become one <code>enum Shape</code> with a
+      <code>Circle(f64)</code> and a <code>Rect(f64, f64)</code> variant. Put <code>area</code> in <code>impl Shape</code> and
+      <code>match self</code>. <code>{:.2}</code> is <code>:.2f</code>.`,
+  },
   cheat: [
     ['class Status(Enum):\n    OPEN = "open"', 'enum Status {\n    Open,\n}'],
     ['Status.OPEN', 'Status::Open'],

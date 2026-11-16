@@ -352,6 +352,68 @@ LESSONS.push({
     `,
     hint: '<code>max_by_key</code> has a twin called <code>min_by_key</code>. Then change the text <code>best:</code> to <code>lowest:</code>.',
   },
+  breaks: [
+    `Lifetimes like <code>'a</code> have no Python version. They don't change how long anything lives. They only tell the
+      compiler which input a returned reference points into.`,
+    `<code>async</code> comes without an event loop. Python ships <code>asyncio</code>; Rust needs a runtime crate such as
+      <code>tokio</code> to run an <code>async fn</code>.`,
+    `Generics are checked. <code>fn f&lt;T&gt;(x: T)</code> may only use what its bounds allow: to print <code>x</code> it needs
+      <code>T: Display</code>. A Python <code>TypeVar</code> is only a hint.`,
+    `Shared ownership is opt-in. <code>Rc</code> and <code>Arc</code> let many names own one value, as Python does all the time,
+      but the value is read-only unless you add <code>RefCell</code> or <code>Mutex</code>.`,
+  ],
+  translate: {
+    py: code`
+      from dataclasses import dataclass
+
+
+      @dataclass
+      class Score:
+          name: str
+          points: int
+
+
+      scores = [Score("ada", 90), Score("bob", 72), Score("cy", 85)]
+      best = max(scores, key=lambda s: s.points)
+      passed = [s.name for s in scores if s.points >= 80]
+      print(f"best: {best.name} ({best.points})")
+      print(f"passed: {', '.join(passed)}")
+    `,
+    starter: code`
+      struct Score {
+          name: String,
+          points: u32,
+      }
+
+      fn main() {
+      }
+    `,
+    solution: code`
+      struct Score {
+          name: String,
+          points: u32,
+      }
+
+      fn main() {
+          let scores = vec![
+              Score { name: String::from("ada"), points: 90 },
+              Score { name: String::from("bob"), points: 72 },
+              Score { name: String::from("cy"), points: 85 },
+          ];
+          let best = scores.iter().max_by_key(|s| s.points).unwrap();
+          let passed: Vec<&str> = scores.iter().filter(|s| s.points >= 80).map(|s| s.name.as_str()).collect();
+          println!("best: {} ({})", best.name, best.points);
+          println!("passed: {}", passed.join(", "));
+      }
+    `,
+    expected: code`
+      best: ada (90)
+      passed: ada, cy
+    `,
+    hint: `<code>max(..., key=...)</code> is <code>.iter().max_by_key(|s| s.points)</code>, which gives an <code>Option</code>
+      because the list could be empty. The comprehension is <code>filter</code> then <code>map</code>; take
+      <code>s.name.as_str()</code> so you can <code>join</code> the result.`,
+  },
   cheat: [
     ['import json', 'use serde_json;'],
     ['from .models import User', 'use crate::models::User;'],

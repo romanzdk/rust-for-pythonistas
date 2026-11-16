@@ -344,6 +344,50 @@ LESSONS.push({
     expected: '4 items, total 43',
     hint: 'One error wants a <code>mut</code>. The other is a misspelled method name, and the help line shows the right one.',
   },
+  breaks: [
+    `You get the errors before the program runs, many at once. Python stops at the first error when that line runs. Fix
+      rustc's first error first: it often causes the ones below it.`,
+    `Compiling is not testing. rustc catches wrong types and ownership mistakes, not wrong logic: <code>a - b</code> where you
+      meant <code>a + b</code> still compiles.`,
+    `The line rustc points at isn't always the line to change. A "borrow of moved value" error points at the later use, but the
+      fix is often at the earlier move: lend with <code>&amp;</code> or copy with <code>.clone()</code>.`,
+    `Warnings are worth reading. An unused variable or an unused <code>Result</code> is often a real bug, even though the
+      program still builds.`,
+  ],
+  translate: {
+    task: `<p>Here is a short Python program. Write the Rust version: it should print exactly the same thing. You will
+      probably meet a compiler error or two on the way, and that is the point of this lesson. Read each one from the top and
+      follow its <code>help:</code> line.</p>`,
+    py: code`
+      temps = [21.5, 19.0, 23.5]
+      avg = sum(temps) / len(temps)
+      print(f"average: {avg:.1f}")
+      warm = [t for t in temps if t > avg]
+      print(f"warm days: {len(warm)}")
+    `,
+    starter: code`
+      fn main() {
+          let temps = vec![21.5, 19.0, 23.5];
+      }
+    `,
+    solution: code`
+      fn main() {
+          let temps = vec![21.5, 19.0, 23.5];
+          let total: f64 = temps.iter().sum();
+          let avg = total / temps.len() as f64;
+          println!("average: {avg:.1}");
+          let warm = temps.iter().filter(|t| **t > avg).count();
+          println!("warm days: {warm}");
+      }
+    `,
+    expected: code`
+      average: 21.3
+      warm days: 2
+    `,
+    hint: `<code>sum</code> needs a type: <code>let total: f64 = temps.iter().sum();</code>. The length is a
+      <code>usize</code>, so cast it with <code>as f64</code> before dividing. <code>filter(...).count()</code> counts without
+      building a list.`,
+  },
   cheat: [
     ['TypeError  # at run time', 'error[E0308]: mismatched types'],
     ['NameError  # at run time', 'error[E0425]: cannot find value'],

@@ -249,6 +249,17 @@ LESSONS.push({
     `,
     hint: 'Copy the <code>println!</code> line, change the text, and keep the <code>;</code> at the end.',
   },
+  breaks: [
+    `Rust has a build step. <code>cargo run</code> first compiles your code into a program in <code>target/debug/</code>, then
+      runs that program. Python reads your <code>.py</code> files every time it runs them.`,
+    `There is no virtual environment to create or activate. <code>target/</code> holds build output, not installed packages,
+      and you can delete it any time: the next <code>cargo build</code> makes it again.`,
+    `The finished program doesn't need Rust. You can copy <code>target/release/hello</code> to another machine with the same
+      OS and CPU type and run it there. A Python script always needs a Python interpreter.`,
+    `Only <code>main</code> runs. Python runs every line at the top of a file, which is why it needs
+      <code>if __name__ == "__main__":</code>. In Rust only definitions (<code>fn</code>, <code>struct</code>, <code>use</code>,
+      <code>const</code>) sit at the top of a file. Code that does something lives inside a function.`,
+  ],
   cheat: [
     ['uv init hello', 'cargo new hello'],
     ['uv run hello', 'cargo run'],

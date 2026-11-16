@@ -336,6 +336,67 @@ LESSONS.push({
     `,
     hint: 'Count the dots. Two dots (<code>..</code>) stop before the end number. Three dots (<code>..=</code>) include it.',
   },
+  breaks: [
+    `There is no truthiness. <code>if items:</code>, <code>if name:</code> and <code>if n:</code> don't compile. Write the check you
+      mean: <code>!items.is_empty()</code>, <code>!name.is_empty()</code>, <code>n != 0</code>.`,
+    `<code>&amp;&amp;</code>, <code>||</code> and <code>!</code> only take and give a <code>bool</code>. Python's <code>x or 0</code>
+      returns one of the two values. In Rust that idea is <code>unwrap_or</code> (lesson 11).`,
+    `Loops have no <code>else</code>. Python's <code>for ... else</code>, which runs when there was no <code>break</code>, doesn't
+      exist. Use <code>loop</code> with a <code>break</code> value, or <code>.any()</code> (lesson 8).`,
+    `There is no negative step. <code>range(5, 0, -1)</code> becomes <code>(1..=5).rev()</code>. A range whose start is bigger
+      than its end, like <code>5..0</code>, is simply empty.`,
+  ],
+  translate: {
+    py: code`
+      for i in range(1, 16):
+          if i % 15 == 0:
+              print("FizzBuzz")
+          elif i % 3 == 0:
+              print("Fizz")
+          elif i % 5 == 0:
+              print("Buzz")
+          else:
+              print(i)
+    `,
+    starter: code`
+      fn main() {
+      }
+    `,
+    solution: code`
+      fn main() {
+          for i in 1..=15 {
+              if i % 15 == 0 {
+                  println!("FizzBuzz");
+              } else if i % 3 == 0 {
+                  println!("Fizz");
+              } else if i % 5 == 0 {
+                  println!("Buzz");
+              } else {
+                  println!("{i}");
+              }
+          }
+      }
+    `,
+    expected: code`
+      1
+      2
+      Fizz
+      4
+      Buzz
+      Fizz
+      7
+      8
+      Fizz
+      Buzz
+      11
+      Fizz
+      13
+      14
+      FizzBuzz
+    `,
+    hint: `<code>range(1, 16)</code> is <code>1..16</code>, or <code>1..=15</code>. <code>elif</code> is <code>else if</code>, and
+      every branch needs <code>{ }</code>.`,
+  },
   cheat: [
     ['if x > 0:', 'if x > 0 {'],
     ['elif x == 0:', '} else if x == 0 {'],

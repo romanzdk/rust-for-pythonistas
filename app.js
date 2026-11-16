@@ -48,6 +48,7 @@ document.addEventListener('click', (e) => {
   if (b) setTheme(b.dataset.setTheme);
 });
 
+const EXERCISE_IDS = new Set(LESSONS.flatMap((l) => [l.id, ...(l.translate ? [`${l.id}/translate`] : [])]));
 const solved = () => new Set(store.get('rfp-solved', []));
 function markSolved(id) {
   store.set('rfp-solved', [...solved().add(id)]);
@@ -111,7 +112,8 @@ function renderNav() {
   const done = solved();
   nav.innerHTML =
     `<a class="brand" href="#/">Rust <span>for</span> Pythonistas</a>` +
-    `<p class="progress">${done.size} / ${LESSONS.length} exercises solved</p>` +
+    `<p class="progress">${[...done].filter((id) => EXERCISE_IDS.has(id)).length} / ${EXERCISE_IDS.size} exercises solved</p>` +
+    `<a class="phrase-link" href="#/phrasebook"${current === 'phrasebook' ? ' aria-current="page"' : ''}>📖 Phrasebook</a>` +
     parts()
       .map(
         (p) =>
@@ -140,13 +142,17 @@ function renderHome() {
       <h1>Learn to read Rust using the Python you already know</h1>
       <p class="lead">Every idea is shown twice, as Python you would write and as the Rust that does the same thing, side by side.
       The goal is modest on purpose: read Rust code and make small, safe changes to it. You won't write large programs here.</p>
-      <p><a class="button primary" href="#/${next.id}">${label} →</a><a class="button" href="${REPO}" target="_blank" rel="noopener">★ Star on GitHub</a></p>
+      <p><a class="button primary" href="#/${next.id}">${label} →</a><a class="button" href="#/phrasebook">📖 Phrasebook</a><a class="button" href="${REPO}" target="_blank" rel="noopener">★ Star on GitHub</a></p>
+      <p class="why">I made this course to learn Rust myself. I learn best by analogy: seeing something I already know next to
+      the new thing. So every idea starts in Python and then shows the Rust. If you learn the same way, I hope it helps you too.
+      <span>— <a href="https://romanzdk.com" target="_blank" rel="noopener">Roman</a></span></p>
     </section>
     <section class="how">
-      <div><b>1 · Side by side</b><p>Python next to Rust. Hover a marked Rust line to see the matching Python line and a short note.</p></div>
+      <div><b>1 · Side by side</b><p>Python next to Rust. Hover a marked Rust line to see the matching Python line and a short note. Then: where the Python analogy breaks.</p></div>
       <div><b>2 · Read it</b><p>Short questions: what does this print, does it compile, what type is this? No running, just reading.</p></div>
       <div><b>3 · Change it</b><p>A small edit to real Rust code. Press Run and it compiles on the official Rust Playground.</p></div>
-      <div><b>4 · Cheat card</b><p>One table with the Python on the left and the Rust on the right, so you can look things up later.</p></div>
+      <div><b>4 · Translate it</b><p>A short Python program. Write the Rust that prints the same thing.</p></div>
+      <div><b>5 · Cheat card</b><p>Python on the left, Rust on the right. The <a href="#/phrasebook">phrasebook</a> puts every card in one searchable page.</p></div>
     </section>
     <h2>Lessons</h2>
     ${parts()
@@ -165,7 +171,7 @@ function renderHome() {
   if (reset)
     reset.onclick = () => {
       store.del('rfp-solved');
-      LESSONS.forEach((l) => store.del(`rfp-draft-${l.id}`));
+      EXERCISE_IDS.forEach((id) => store.del(`rfp-draft-${id}`));
       route();
     };
 }
@@ -296,12 +302,32 @@ const cleanStderr = (s) =>
     .join('\n')
     .trim();
 
-function wireExercise(lesson) {
-  const ex = lesson.exercise;
-  const key = `rfp-draft-${lesson.id}`;
-  const ta = document.getElementById('editor');
+function exerciseHTML(ex, intro = '') {
+  return `<div class="exercise">
+        <div class="prose">${ex.task}</div>
+        ${intro}
+        ${ex.test
+          ? '<p class="muted">This code has no <code>main</code>. <b>Run</b> runs its tests (<code>cargo test</code>). The goal is for all of them to pass.</p>'
+          : `<div class="output"><span>Expected output</span><pre>${esc(ex.expected)}</pre></div>`}
+        <div class="editor-wrap"><textarea spellcheck="false" aria-label="Rust code editor"></textarea></div>
+        <div class="actions">
+          <button class="primary run" title="Ctrl/Cmd + Enter">▶ Run</button>
+          <button class="reset">Reset</button>
+          ${ex.hint ? '<button class="show-hint">Hint</button>' : ''}
+          <button class="show-solution">Show solution</button>
+        </div>
+        ${ex.hint ? `<p class="hint" hidden>💡 ${ex.hint}</p>` : ''}
+        <div class="result" aria-live="polite"></div>
+      </div>`;
+}
+
+function wireExercise(box, ex, lesson, id) {
+  const key = `rfp-draft-${id}`;
+  const $ = (sel) => box.querySelector(sel);
+  const ta = $('textarea');
   ta.value = store.get(key, ex.starter);
-  const run = () => document.getElementById('run').click();
+  const btn = $('.run');
+  const run = () => btn.click();
   const ed = window.CodeMirror
     ? CodeMirror.fromTextArea(ta, {
         mode: 'rust',
@@ -313,8 +339,7 @@ function wireExercise(lesson) {
     : { getValue: () => ta.value, setValue: (v) => (ta.value = v), on: (_, f) => ta.addEventListener('input', f) };
   ed.on('change', () => store.set(key, ed.getValue()));
 
-  const result = document.getElementById('result');
-  const btn = document.getElementById('run');
+  const result = $('.result');
   btn.onclick = async () => {
     btn.disabled = true;
     result.className = 'result';
@@ -327,14 +352,14 @@ function wireExercise(lesson) {
       if (ex.test && r.success) {
         result.className = 'result ok';
         result.innerHTML = `<p><b>✅ Solved!</b> All tests pass. ${nextLink(lesson)}</p><pre>${esc(out)}</pre>`;
-        markSolved(lesson.id);
+        markSolved(id);
       } else if (ex.test && out.includes('test result: FAILED')) {
         result.className = 'result warn';
         result.innerHTML = `<p><b>It compiles, but a test fails.</b> Read the <code>left</code> / <code>right</code> lines: they show what the code gave and what the test expected.</p><pre>${esc(out)}</pre>`;
       } else if (!ex.test && r.success && out === normalize(ex.expected)) {
         result.className = 'result ok';
         result.innerHTML = `<p><b>✅ Solved!</b> The output matches. ${nextLink(lesson)}</p><pre>${esc(out)}</pre>`;
-        markSolved(lesson.id);
+        markSolved(id);
       } else if (!ex.test && r.success) {
         result.className = 'result warn';
         result.innerHTML = `<p><b>It compiles and runs, but the output is different.</b></p>
@@ -353,15 +378,15 @@ function wireExercise(lesson) {
       btn.disabled = false;
     }
   };
-  document.getElementById('reset').onclick = () => {
+  $('.reset').onclick = () => {
     ed.setValue(ex.starter);
     result.innerHTML = '';
   };
-  document.getElementById('solution').onclick = () => {
+  $('.show-solution').onclick = () => {
     if (confirm('Replace your code with the solution?')) ed.setValue(ex.solution);
   };
-  const hint = document.getElementById('hint');
-  if (hint) hint.onclick = () => (document.getElementById('hint-text').hidden = false);
+  const hint = $('.show-hint');
+  if (hint) hint.onclick = () => ($('.hint').hidden = false);
 }
 
 function nextLink(lesson) {
@@ -384,32 +409,22 @@ function renderLesson(i) {
 
       <h2><span class="step">1</span> Side by side</h2>
       ${examples.map((e) => e.html).join('')}
+      <aside class="breaks"><h3>Where the Python analogy breaks</h3><ul>${l.breaks.map((b) => `<li>${b}</li>`).join('')}</ul></aside>
 
       <h2><span class="step">2</span> Read it</h2>
       <p class="muted">Answer by reading the code. Don't run it.</p>
       ${l.quiz.map(quizHTML).join('')}
 
       <h2><span class="step">3</span> Change it</h2>
-      <div class="exercise">
-        <div class="prose">${l.exercise.task}</div>
-        ${l.exercise.test
-          ? '<p class="muted">This code has no <code>main</code>. <b>Run</b> runs its tests (<code>cargo test</code>). The goal is for all of them to pass.</p>'
-          : `<div class="output"><span>Expected output</span><pre>${esc(l.exercise.expected)}</pre></div>`}
-        <div class="editor-wrap"><textarea id="editor" spellcheck="false" aria-label="Rust code editor"></textarea></div>
-        <div class="actions">
-          <button class="primary" id="run" title="Ctrl/Cmd + Enter">▶ Run</button>
-          <button id="reset">Reset</button>
-          ${l.exercise.hint ? '<button id="hint">Hint</button>' : ''}
-          <button id="solution">Show solution</button>
-        </div>
-        ${l.exercise.hint ? `<p class="hint" id="hint-text" hidden>💡 ${l.exercise.hint}</p>` : ''}
-        <div id="result" class="result" aria-live="polite"></div>
-      </div>
-
-      <h2><span class="step">4</span> Cheat card</h2>
-      <div class="table-wrap"><table class="cheat"><thead><tr><th>Python</th><th>Rust</th></tr></thead><tbody>
-        ${l.cheat.map(([py, rs]) => `<tr><td>${inlineCode(py, 'python')}</td><td>${inlineCode(rs, 'rust')}</td></tr>`).join('')}
-      </tbody></table></div>
+      <div id="change">${exerciseHTML(l.exercise)}</div>
+${l.translate ? `
+      <h2><span class="step">4</span> Translate it</h2>
+      <div id="translate">${exerciseHTML(
+        { task: '<p>Here is a short Python program. Write the Rust version: it should print exactly the same thing.</p>', ...l.translate },
+        `<figure class="panel"><figcaption>Python</figcaption>${codeBlock(l.translate.py, 'python')}</figure>`,
+      )}</div>` : ''}
+      <h2><span class="step">${l.translate ? 5 : 4}</span> Cheat card</h2>
+      ${cheatTable(l.cheat)}
 
       <nav class="pager">
         ${prev ? `<a href="#/${prev.id}">← ${esc(prev.title)}</a>` : '<a href="#/">← All lessons</a>'}
@@ -418,13 +433,51 @@ function renderLesson(i) {
     </article>`;
   main.querySelectorAll('.example').forEach((sec, k) => wireExample(sec, examples[k].links));
   main.querySelectorAll('.quiz').forEach(wireQuiz);
-  wireExercise(l);
+  wireExercise(document.querySelector('#change .exercise'), l.exercise, l, l.id);
+  if (l.translate) wireExercise(document.querySelector('#translate .exercise'), l.translate, l, `${l.id}/translate`);
+}
+
+const cheatTable = (rows, lesson = false) =>
+  `<div class="table-wrap"><table class="cheat${lesson ? ' phrases' : ''}"><thead><tr><th>Python</th><th>Rust</th>${lesson ? '<th>Lesson</th>' : ''}</tr></thead><tbody>
+    ${rows.map(([py, rs, l, i]) => `<tr data-text="${esc(`${py}\n${rs}`.toLowerCase())}"><td>${inlineCode(py, 'python')}</td><td>${inlineCode(rs, 'rust')}</td>${
+      lesson ? `<td><a href="#/${l.id}">${i + 1}. ${esc(l.title)}</a></td>` : ''}</tr>`).join('')}
+  </tbody></table></div>`;
+
+function renderPhrasebook() {
+  document.title = 'Phrasebook · Rust for Pythonistas';
+  const rows = LESSONS.flatMap((l, i) => l.cheat.map(([py, rs]) => [py, rs, l, i]));
+  main.innerHTML = `
+    <article class="lesson">
+      <p class="eyebrow">Every cheat card in one place</p>
+      <h1>Python → Rust phrasebook</h1>
+      <p class="lead">Search for the Python you know, like <code>append</code>, <code>range</code> or <code>except</code>, to find the
+      Rust that does the same thing and the lesson that explains it.</p>
+      <p><input id="phrase-search" type="search" placeholder="Search Python or Rust…" aria-label="Search the phrasebook" autocomplete="off"></p>
+      <p class="muted" id="phrase-count"></p>
+      ${cheatTable(rows, true)}
+    </article>`;
+  const input = document.getElementById('phrase-search');
+  const count = document.getElementById('phrase-count');
+  const filter = () => {
+    const words = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+    let shown = 0;
+    main.querySelectorAll('tbody tr').forEach((tr) => {
+      const hit = words.every((w) => tr.dataset.text.includes(w));
+      tr.hidden = !hit;
+      shown += hit;
+    });
+    count.textContent = `${shown} of ${rows.length} rows`;
+  };
+  input.addEventListener('input', filter);
+  filter();
+  input.focus();
 }
 
 function route() {
   const id = location.hash.replace(/^#\/?/, '');
   const i = LESSONS.findIndex((l) => l.id === id);
-  if (i < 0) renderHome();
+  if (id === 'phrasebook') renderPhrasebook();
+  else if (i < 0) renderHome();
   else renderLesson(i);
   renderNav();
   document.body.classList.remove('nav-open');

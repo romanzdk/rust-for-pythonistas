@@ -20,6 +20,9 @@ A free, interactive course: Python and Rust side by side, quizzes, and exercises
 
 ## Why this course
 
+I made this course to learn Rust myself. I learn best by analogy: seeing something I already know next to the new
+thing. So every idea here starts in Python and then shows the Rust. If you learn the same way, I hope it helps you too.
+
 You know Python well. Rust keeps showing up in the tools you use (uv, ruff, polars, pydantic-core) and in code you
 have to review or change at work. You don't need to become a Rust author. You need to **read** Rust confidently and
 make **small, safe changes**, guided by the compiler.
@@ -31,9 +34,11 @@ Most Rust courses start from zero and aim at writing large programs. This one st
 | | |
 |---|---|
 | **1 · Side by side** | Python on the left, Rust on the right. Hover over or tap a marked Rust line to light up the matching Python line and read a short note on how to read it. |
+| **Where the analogy breaks** | A short box after the examples: the places where your Python intuition will mislead you. |
 | **2 · Read it** | Short questions you answer by reading only: *what does this print*, *does this compile*, *what type is this*. |
 | **3 · Change it** | A small edit to real Rust code. **Run** compiles it on the official [Rust Playground](https://play.rust-lang.org) and checks the result. |
-| **4 · Cheat card** | A Python ↔ Rust lookup table for the topic, to come back to later. |
+| **4 · Translate it** | A short Python program. You write the Rust that prints the same thing, and **Run** checks it. |
+| **5 · Cheat card** | A Python ↔ Rust lookup table for the topic. The [phrasebook](https://romanzdk.github.io/rust-for-pythonistas/#/phrasebook) puts every card on one searchable page. |
 
 Examples that fail on purpose show the real compiler error, and you can open the fixed version next to it.
 
@@ -84,6 +89,7 @@ A course is only useful if its examples are right, so CI checks **every** exampl
 - "Does it compile?" and "What does it print?" answers are checked against the real `rustc` and real output.
 - Examples that fail on purpose must fail with the exact error shown, and their fixed versions must run.
 - Every exercise solution must pass, and no starter code may pass before you change it.
+- Every "Translate it" Python program must print the expected output, and so must the Rust solution.
 - Command-line examples run with the arguments, files, stdin and environment variables the page shows, and must
   give the shown output, stderr and exit code.
 - `Cargo.toml`, terminal commands, `cargo test` output, the Dockerfile and the PyO3 example are checked by running the

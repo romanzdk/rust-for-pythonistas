@@ -7,6 +7,11 @@ services at work, and in code reviews. They need to **read** it and make **small
 need to become Rust authors. Existing courses (the Rust Book, rustlings) start from zero and aim at writing.
 This course starts from Python and aims at reading.
 
+It started as the author's own way to learn Rust: by analogy, always seeing something already known (Python) next to
+the new thing (Rust). Each lesson follows that idea: side-by-side examples, then a short "where the Python analogy
+breaks" box, questions, a small change to Rust code, a Python program to translate into Rust, and a cheat card. A
+phrasebook page (`#/phrasebook`) collects all cheat cards in one searchable table.
+
 ## Goals / non-goals
 
 - Goal: after the course, a Python developer can read typical Rust (structs, enums, `match`, `Option`/`Result`,
@@ -35,7 +40,8 @@ This course starts from Python and aims at reading.
   Test examples run under pytest and `rustc --test`. Command-line examples (`run`) get the same arguments, files,
   stdin and environment on both sides and must match the shown output, stderr and exit code. File/command examples (`files: true`) carry a hidden `check`
   script that runs the real tools (cargo, uv, pytest, docker, maturin) on the shown files and commands. Only folder-tree
-  pictures (`diagram: true`) are not run.
+  pictures (`diagram: true`) are not run. A "Translate it" step (`translate`) must print `expected` both as Python
+  and as the Rust solution.
 - `scripts/check.mjs` loads the same files as `index.html` and runs every Python/Rust snippet locally with `python3` and
   `rustc --edition 2024`. GitHub Actions runs it on each push. GitHub Pages serves `main` as-is.
 

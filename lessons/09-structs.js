@@ -398,6 +398,76 @@ LESSONS.push({
     expected: '1',
     hint: 'The body writes to <code>self.n</code>, so the method needs <code>&amp;mut self</code> instead of <code>&amp;self</code>.',
   },
+  breaks: [
+    `No inheritance. A struct can't extend another struct. Share behavior with traits (lesson 14), or put one struct inside
+      another as a field.`,
+    `No new fields at run time. <code>p.color = "red"</code> doesn't compile unless <code>color</code> is declared in the struct.
+      Every field is listed up front, with its type.`,
+    `<code>new</code> is a normal function, not a special method like <code>__init__</code>. You can skip it and write
+      <code>Point { x: 1, y: 2 }</code>, or have several constructors with different names.`,
+    `<code>self</code> says how a method uses the value: <code>&amp;self</code> reads it, <code>&amp;mut self</code> changes it, and
+      plain <code>self</code> takes it over. Python's <code>self</code> is always the same.`,
+    `Nothing comes for free. A dataclass gets <code>__repr__</code> and <code>__eq__</code> automatically. A struct gets them only
+      when you add <code>#[derive(Debug, PartialEq)]</code>.`,
+  ],
+  translate: {
+    py: code`
+      from dataclasses import dataclass
+
+
+      @dataclass
+      class Account:
+          owner: str
+          balance: int
+
+          def deposit(self, amount: int) -> None:
+              self.balance += amount
+
+          def summary(self) -> str:
+              return f"{self.owner}: {self.balance}"
+
+
+      acc = Account("Ada", 100)
+      acc.deposit(50)
+      print(acc.summary())
+    `,
+    starter: code`
+      struct Account {
+      }
+
+      fn main() {
+      }
+    `,
+    solution: code`
+      struct Account {
+          owner: String,
+          balance: i32,
+      }
+
+      impl Account {
+          fn new(owner: &str, balance: i32) -> Account {
+              Account { owner: String::from(owner), balance }
+          }
+
+          fn deposit(&mut self, amount: i32) {
+              self.balance += amount;
+          }
+
+          fn summary(&self) -> String {
+              format!("{}: {}", self.owner, self.balance)
+          }
+      }
+
+      fn main() {
+          let mut acc = Account::new("Ada", 100);
+          acc.deposit(50);
+          println!("{}", acc.summary());
+      }
+    `,
+    expected: 'Ada: 150',
+    hint: `Fields go in the <code>struct</code>, methods in <code>impl Account</code>. <code>deposit</code> changes the account,
+      so it takes <code>&amp;mut self</code>, and <code>acc</code> must be <code>let mut</code>.`,
+  },
   cheat: [
     ['class Point:\n    def __init__(self, x, y):\n        self.x = x\n        self.y = y', 'struct Point {\n    x: i32,\n    y: i32,\n}'],
     ['p = Point(1, 2)', 'let p = Point::new(1, 2);'],

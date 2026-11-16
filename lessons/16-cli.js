@@ -381,6 +381,58 @@ LESSONS.push({
     expected: 'Hello, world!',
     hint: '<code>.unwrap()</code> crashes on an <code>Err</code>. <code>.unwrap_or(String::from("world"))</code> uses a default instead.',
   },
+  breaks: [
+    `<code>env::args()</code> starts with the program name, like <code>sys.argv</code>, but it is an iterator, not a list. Use
+      <code>.nth(1)</code>, or <code>.collect()</code> it into a <code>Vec</code> to index it.`,
+    `Reading a file returns a <code>Result</code>. There's no exception when the file is missing; you decide what happens with
+      <code>match</code>, <code>?</code> or <code>expect</code>.`,
+    `The program is a binary, not a script. After <code>cargo build --release</code> you ship one file from
+      <code>target/release/</code>, and the server doesn't need Rust. That's why the Docker example builds in one image and runs
+      in a much smaller one.`,
+    `A panic exits with code 101, not 1 like an uncaught Python exception. For a clean exit code, return <code>ExitCode</code>
+      from <code>main</code> or call <code>std::process::exit</code>.`,
+  ],
+  translate: {
+    task: `<p>On the Playground there are no files and no arguments, so here the "file" is a string. Write the Rust version of
+      this Python: it should print exactly the same thing.</p>`,
+    py: code`
+      text = "apples 3\npears 5\nplums 2"
+
+      total = 0
+      for line in text.splitlines():
+          name, count = line.split(" ")
+          total += int(count)
+          print(f"{name}: {count}")
+      print(f"total: {total}")
+    `,
+    starter: code`
+      fn main() {
+          let text = "apples 3\npears 5\nplums 2";
+      }
+    `,
+    solution: code`
+      fn main() {
+          let text = "apples 3\npears 5\nplums 2";
+
+          let mut total = 0;
+          for line in text.lines() {
+              let (name, count) = line.split_once(' ').unwrap();
+              total += count.parse::<i32>().unwrap();
+              println!("{name}: {count}");
+          }
+          println!("total: {total}");
+      }
+    `,
+    expected: code`
+      apples: 3
+      pears: 5
+      plums: 2
+      total: 10
+    `,
+    hint: `<code>text.lines()</code> is <code>splitlines()</code>. <code>line.split_once(' ')</code> gives an <code>Option</code>
+      with the two halves, so <code>let (name, count) = line.split_once(' ').unwrap();</code> works like the tuple unpacking.
+      Turn the count into a number with <code>count.parse::&lt;i32&gt;()</code>.`,
+  },
   cheat: [
     ['sys.argv', 'std::env::args()  // the program comes first, like argv[0]'],
     ['sys.argv[1]', 'env::args().nth(1)  // an Option'],

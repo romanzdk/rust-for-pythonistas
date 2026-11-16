@@ -368,6 +368,61 @@ LESSONS.push({
     `,
     hint: 'There is a version of <code>unwrap</code> that takes a default: <code>unwrap_or(...)</code>. The value inside is a reference, so the default is written <code>&amp;0</code>.',
   },
+  breaks: [
+    `<code>Option&lt;i32&gt;</code> is not an <code>i32</code>. You can't add 1 to it, or pass it where an <code>i32</code> is
+      needed, until you take the value out. In Python, <code>Optional[int]</code> is only a hint, and <code>x + 1</code> runs and
+      maybe crashes.`,
+    `Nothing else can be missing. A <code>String</code>, an <code>i32</code> or a struct is never null; only an
+      <code>Option</code> can be empty. In Python any variable might turn out to be <code>None</code>.`,
+    `<code>unwrap_or</code> is not <code>or</code>. Python's <code>x or 0</code> also replaces <code>0</code>, <code>""</code> and
+      <code>[]</code>. <code>Some(0).unwrap_or(5)</code> is still 0: only <code>None</code> gets replaced.`,
+    `<code>?</code> stops the whole function. On an <code>Option</code> it returns <code>None</code> from the function right away.
+      It is not the <code>?.</code> from other languages that keeps going with a missing value.`,
+  ],
+  translate: {
+    py: code`
+      stock = {"apples": 3, "pears": 0}
+
+      for item in ["apples", "pears", "kiwis"]:
+          count = stock.get(item)
+          if count is None:
+              print(f"{item}: not sold here")
+          else:
+              print(f"{item}: {count} left")
+    `,
+    starter: code`
+      use std::collections::HashMap;
+
+      fn main() {
+          let mut stock = HashMap::new();
+          stock.insert("apples", 3);
+          stock.insert("pears", 0);
+      }
+    `,
+    solution: code`
+      use std::collections::HashMap;
+
+      fn main() {
+          let mut stock = HashMap::new();
+          stock.insert("apples", 3);
+          stock.insert("pears", 0);
+
+          for item in ["apples", "pears", "kiwis"] {
+              match stock.get(item) {
+                  Some(count) => println!("{item}: {count} left"),
+                  None => println!("{item}: not sold here"),
+              }
+          }
+      }
+    `,
+    expected: code`
+      apples: 3 left
+      pears: 0 left
+      kiwis: not sold here
+    `,
+    hint: `<code>stock.get(item)</code> gives an <code>Option</code>: <code>Some(count)</code> or <code>None</code>. Handle both
+      with <code>match</code>. Pears has 0, and that is <code>Some(0)</code>, not <code>None</code>.`,
+  },
   cheat: [
     ['x: Optional[int] = None', 'let x: Option<i32> = None;'],
     ['x = 5  # may be None later', 'let x = Some(5);'],

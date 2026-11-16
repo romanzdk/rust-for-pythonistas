@@ -228,6 +228,50 @@ LESSONS.push({
     expected: 'Hello, Ada!',
     hint: 'Call it by its full path, <code>greeting::greet("Ada")</code>, and print the result with <code>println!("{}", ...)</code>.',
   },
+  breaks: [
+    `A file is not a module until you say so. Python finds <code>greeting.py</code> as soon as you import it. Rust ignores
+      <code>src/greeting.rs</code> until <code>main.rs</code> says <code>mod greeting;</code>.`,
+    `Private really is private. A leading <code>_</code> in Python is a polite hint. In Rust, using something without
+      <code>pub</code> from another module is a compile error.`,
+    `<code>use</code> runs nothing. Python's <code>import</code> runs the module's top-level code the first time. Rust's
+      <code>use</code> only makes a long name short.`,
+    `The types are part of the function. Python's <code>-&gt; str</code> is a hint that nothing checks at run time. In Rust,
+      returning the wrong type doesn't compile.`,
+  ],
+  translate: {
+    py: code`
+      def describe(name: str, age: int) -> str:
+          return f"{name} is {age} years old"
+
+
+      print(describe("Ada", 36))
+      print(describe("Linus", 54))
+    `,
+    starter: code`
+      // Write describe here.
+
+      fn main() {
+          // Call it twice, like the Python does.
+      }
+    `,
+    solution: code`
+      fn describe(name: &str, age: i32) -> String {
+          format!("{name} is {age} years old")
+      }
+
+      fn main() {
+          println!("{}", describe("Ada", 36));
+          println!("{}", describe("Linus", 54));
+      }
+    `,
+    expected: code`
+      Ada is 36 years old
+      Linus is 54 years old
+    `,
+    hint: `Copy the shape of <code>greet</code> from the examples: <code>&amp;str</code> in, <code>String</code> out, and
+      <code>format!</code> on the last line with no semicolon. Python's <code>int</code> becomes <code>i32</code> (lesson 4 explains
+      the number types).`,
+  },
   cheat: [
     ['def greet(name: str) -> str:', 'pub fn greet(name: &str) -> String {'],
     ['return f"Hello, {name}!"', 'format!("Hello, {name}!")  // last line, no ;'],

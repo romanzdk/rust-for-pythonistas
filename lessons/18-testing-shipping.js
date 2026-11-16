@@ -493,6 +493,55 @@ LESSONS.push({
     `,
     hint: 'The code computes the discount itself (100 for 10% of 1000), not the price that is left. You pay <code>100 - percent</code> percent.',
   },
+  breaks: [
+    `Unit tests live next to the code, in a <code>#[cfg(test)] mod tests</code> block in the same file, and they can test private
+      functions. Python usually keeps tests in a separate <code>tests/</code> folder.`,
+    `No fixtures and no <code>parametrize</code> built in. A test is a plain function. For a table of cases, loop over an array
+      inside one test.`,
+    `<code>cargo test</code> runs tests in parallel, on several threads, by default. Tests that share a file or a global
+      setting can get in each other's way.`,
+    `A release build runs on one platform. A pure-Python wheel runs anywhere Python does. A Rust binary is built for one OS and
+      CPU type, so you build one for Linux, one for macOS, and so on.`,
+  ],
+  translate: {
+    task: `<p>Here is a short Python program with plain <code>assert</code>s. Write the Rust version, with
+      <code>assert!</code> or <code>assert_eq!</code> in <code>main</code>: it should print exactly the same thing. When it
+      passes, break the function on purpose and run it again to see what a failed assert looks like.</p>`,
+    py: code`
+      def is_leap(year: int) -> bool:
+          return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
+
+
+      assert is_leap(2024)
+      assert not is_leap(1900)
+      assert is_leap(2000)
+      assert not is_leap(2023)
+      print("all checks pass")
+    `,
+    starter: code`
+      // Write is_leap here.
+
+      fn main() {
+      }
+    `,
+    solution: code`
+      fn is_leap(year: i32) -> bool {
+          year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
+      }
+
+      fn main() {
+          assert!(is_leap(2024));
+          assert!(!is_leap(1900));
+          assert_eq!(is_leap(2000), true);
+          assert_eq!(is_leap(2023), false);
+          println!("all checks pass");
+      }
+    `,
+    expected: 'all checks pass',
+    hint: `<code>and</code>, <code>or</code> and <code>not</code> are <code>&amp;&amp;</code>, <code>||</code> and
+      <code>!</code>. <code>assert x</code> is <code>assert!(x);</code>, and <code>assert a == b</code> is
+      <code>assert_eq!(a, b);</code>.`,
+  },
   cheat: [
     ['pytest', 'cargo test'],
     ['pytest -k negative', 'cargo test negative'],

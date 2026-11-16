@@ -374,6 +374,70 @@ LESSONS.push({
     `,
     hint: 'Delete <code>unwrap()</code> and put a <code>?</code> right after <code>parse()</code>. The function already promises it returns a Result, so ? has somewhere to return the error to.',
   },
+  breaks: [
+    `Errors are values, not jumps. A Rust function that can fail returns a <code>Result</code>, and the caller has to deal with
+      it. Nothing travels up the call stack by itself unless you write <code>?</code>.`,
+    `<code>?</code> only works inside a function that returns <code>Result</code> (or <code>Option</code>), and the error types
+      must fit. In Python any function can raise anything.`,
+    `There's no <code>finally</code> and no <code>with</code>. Cleanup happens when a value goes out of scope: a file closes at
+      the <code>}</code> where its variable ends, even after an early <code>return</code> or <code>?</code>.`,
+    `A panic is not an exception. <code>panic!</code>, <code>unwrap()</code> and <code>expect()</code> are for bugs and "can't
+      happen" cases, not normal error handling. Use <code>Result</code> for errors you expect, like bad input.`,
+  ],
+  translate: {
+    py: code`
+      def parse_price(text: str) -> int:
+          try:
+              value = int(text)
+          except ValueError:
+              raise ValueError(f"not a number: {text}")
+          if value < 0:
+              raise ValueError(f"negative: {value}")
+          return value
+
+
+      for text in ["42", "-5", "abc"]:
+          try:
+              print(f"ok: {parse_price(text)}")
+          except ValueError as e:
+              print(f"error: {e}")
+    `,
+    starter: code`
+      // Write parse_price here. It returns Result<i32, String>.
+
+      fn main() {
+      }
+    `,
+    solution: code`
+      fn parse_price(text: &str) -> Result<i32, String> {
+          let value: i32 = match text.parse() {
+              Ok(v) => v,
+              Err(_) => return Err(format!("not a number: {text}")),
+          };
+          if value < 0 {
+              return Err(format!("negative: {value}"));
+          }
+          Ok(value)
+      }
+
+      fn main() {
+          for text in ["42", "-5", "abc"] {
+              match parse_price(text) {
+                  Ok(v) => println!("ok: {v}"),
+                  Err(e) => println!("error: {e}"),
+              }
+          }
+      }
+    `,
+    expected: code`
+      ok: 42
+      error: negative: -5
+      error: not a number: abc
+    `,
+    hint: `Each <code>raise</code> becomes <code>return Err(format!(...));</code>, and the happy end is <code>Ok(value)</code>.
+      <code>text.parse()</code> gives a <code>Result</code> too: <code>match</code> it. In <code>main</code>, a <code>match</code>
+      with <code>Ok</code> and <code>Err</code> arms takes the place of <code>try</code> / <code>except</code>.`,
+  },
   cheat: [
     ['try:\n    n = int(s)\nexcept ValueError:\n    n = 0', 'let n: i32 = s.parse().unwrap_or(0);'],
     ['n = int(s)  # may raise', 'let n: i32 = s.parse::<i32>()?;'],

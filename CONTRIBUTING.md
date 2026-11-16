@@ -75,6 +75,9 @@ LESSONS.push({
   exercise: { task: `<p>HTML</p>`, starter: code`...`, solution: code`...`, expected: code`...`, hint: '...' },
   // or a test exercise (no main, no expected; it passes when `cargo test` passes):
   // exercise: { test: true, task, starter, solution, hint },
+  breaks: [`HTML: one place where Python intuition misleads you`, ...],  // "Where the Python analogy breaks"
+  // Optional "Translate it" step. py must print expected, and so must the Rust solution (checked):
+  translate: { py: code`...`, starter: code`...`, solution: code`...`, expected: code`...`, hint: '...', task: '<p>optional</p>' },
   cheat: [['python', 'rust'], ...],
 });
 ```
