@@ -107,7 +107,7 @@ LESSONS.push({
         [1, [4, 8], 'One type for shapes, where Python has one class per shape.'],
         [2, [3, 4, 5], 'A <b>tuple variant</b>: it holds the values written in the brackets, in order. Here one <code>f64</code>, the radius.'],
         [3, [7, 8, 9], 'A <b>struct variant</b>: named fields, like a dataclass. Both kinds can live in the same enum.'],
-        [6, 12, '<code>&amp;Shape</code> means the data is borrowed, not moved. Read <code>&amp;</code> as "borrowed"; lesson 11 explains it.'],
+        [6, 12, '<code>&amp;Shape</code> means the data is borrowed, not moved. Read <code>&amp;</code> as "borrowed"; lesson 13 explains it.'],
         [7, 13, '<code>match</code> on the shape: one arm per variant.'],
         [8, [13, 14], 'The pattern <code>Shape::Circle(r)</code> only fits a circle, and <code>r</code> is the number inside it. That replaces <code>isinstance</code> plus <code>shape.radius</code>.'],
         [9, 15, 'The fields are pulled out by name. <code>w</code> and <code>h</code> are new local variables, so no <code>shape.</code> is needed.'],
@@ -229,7 +229,7 @@ LESSONS.push({
     },
     {
       title: 'Methods on an enum',
-      text: `<p>An enum can have an <code>impl</code> block, just like a struct (lesson 7). The method usually matches on
+      text: `<p>An enum can have an <code>impl</code> block, just like a struct (lesson 9). The method usually matches on
       <code>self</code> and turns the variant into a number or a string. This is the closest thing to a Python
       <code>Enum</code> whose members have a value.</p>`,
       py: code`
@@ -280,7 +280,7 @@ LESSONS.push({
         [10, [10, 11], 'The <code>match</code> on <code>self</code> is the whole body, so its value is the return value. Python returns <code>self.value</code> instead.'],
         [11, null, 'A pattern with no data. The number on the right is what this variant is worth.'],
         [20, 13, 'A <code>Vec</code> of coins, like the Python list.'],
-        [21, 14, '<code>map</code> calls <code>cents</code> on each coin and <code>sum</code> adds them up (lesson 6). The <code>: u32</code> is needed because <code>sum</code> can produce several number types, and here it must match <code>cents</code>.'],
+        [21, 14, '<code>map</code> calls <code>cents</code> on each coin and <code>sum</code> adds them up (lesson 8). The <code>: u32</code> is needed because <code>sum</code> can produce several number types, and here it must match <code>cents</code>.'],
       ],
     },
   ],

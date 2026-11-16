@@ -23,6 +23,31 @@ const store = {
   },
 };
 
+const REPO = 'https://github.com/romanzdk/rust-for-pythonistas';
+const THEMES = [
+  ['light', '☀', 'Light'],
+  ['dark', '☾', 'Dark'],
+  ['system', '◐', 'System'],
+];
+const currentTheme = () => document.documentElement.dataset.theme || 'system';
+function setTheme(theme) {
+  if (theme === 'system') delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = theme;
+  try {
+    if (theme === 'system') localStorage.removeItem('rfp-theme');
+    else localStorage.setItem('rfp-theme', theme);
+  } catch {}
+  document.querySelectorAll('[data-set-theme]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.setTheme === theme)));
+}
+const themeSwitch = () =>
+  `<div class="theme" role="group" aria-label="Color theme">${THEMES.map(
+    ([t, icon, label]) => `<button type="button" data-set-theme="${t}" aria-pressed="${currentTheme() === t}" title="${label} theme">${icon}<span>${label}</span></button>`,
+  ).join('')}</div>`;
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-set-theme]');
+  if (b) setTheme(b.dataset.setTheme);
+});
+
 const solved = () => new Set(store.get('rfp-solved', []));
 function markSolved(id) {
   store.set('rfp-solved', [...solved().add(id)]);
@@ -71,17 +96,37 @@ function codeBlock(src, lang, side = '', marked = new Set()) {
 
 const inlineCode = (src, lang) => `<code class="inline">${window.hljs ? hljs.highlight(src, { language: lang, ignoreIllegals: true }).value : esc(src)}</code>`;
 
+// Lessons are grouped into parts; a lesson with `part` starts a new group.
+function parts() {
+  const groups = [];
+  LESSONS.forEach((l, i) => {
+    if (l.part || !groups.length) groups.push({ title: l.part || '', items: [] });
+    groups.at(-1).items.push([l, i]);
+  });
+  return groups;
+}
+
 function renderNav() {
   const current = location.hash.replace(/^#\/?/, '');
   const done = solved();
   nav.innerHTML =
     `<a class="brand" href="#/">Rust <span>for</span> Pythonistas</a>` +
-    `<p class="progress">${done.size} / ${LESSONS.length} exercises solved</p><ol>` +
-    LESSONS.map(
-      (l) =>
-        `<li><a href="#/${l.id}"${l.id === current ? ' aria-current="page"' : ''}>${esc(l.title)}${done.has(l.id) ? ' <span class="check" title="Exercise solved">✓</span>' : ''}</a></li>`,
-    ).join('') +
-    '</ol>';
+    `<p class="progress">${done.size} / ${LESSONS.length} exercises solved</p>` +
+    parts()
+      .map(
+        (p) =>
+          `<p class="part">${esc(p.title)}</p><ol start="${p.items[0][1] + 1}">` +
+          p.items
+            .map(
+              ([l]) =>
+                `<li><a href="#/${l.id}"${l.id === current ? ' aria-current="page"' : ''}>${esc(l.title)}${done.has(l.id) ? ' <span class="check" title="Exercise solved">✓</span>' : ''}</a></li>`,
+            )
+            .join('') +
+          '</ol>',
+      )
+      .join('') +
+    `<div class="nav-foot">${themeSwitch()}
+      <p class="links"><a href="${REPO}" target="_blank" rel="noopener">GitHub ↗</a> · <a href="https://romanzdk.com" target="_blank" rel="noopener">romanzdk.com ↗</a></p></div>`;
 }
 
 function renderHome() {
@@ -95,7 +140,7 @@ function renderHome() {
       <h1>Learn to read Rust using the Python you already know</h1>
       <p class="lead">Every idea is shown twice, as Python you would write and as the Rust that does the same thing, side by side.
       The goal is modest on purpose: read Rust code and make small, safe changes to it. You won't write large programs here.</p>
-      <p><a class="button primary" href="#/${next.id}">${label} →</a></p>
+      <p><a class="button primary" href="#/${next.id}">${label} →</a><a class="button" href="${REPO}" target="_blank" rel="noopener">★ Star on GitHub</a></p>
     </section>
     <section class="how">
       <div><b>1 · Side by side</b><p>Python next to Rust. Hover a marked Rust line to see the matching Python line and a short note.</p></div>
@@ -104,9 +149,17 @@ function renderHome() {
       <div><b>4 · Cheat card</b><p>One table with the Python on the left and the Rust on the right, so you can look things up later.</p></div>
     </section>
     <h2>Lessons</h2>
-    <ol class="cards">${LESSONS.map(
-      (l, i) => `<li><a href="#/${l.id}"><span class="num">${i + 1}</span><b>${esc(l.title)}${done.has(l.id) ? ' <span class="check">✓</span>' : ''}</b><span>${esc(l.summary)}</span></a></li>`,
-    ).join('')}</ol>
+    ${parts()
+      .map(
+        (p) =>
+          `<h3 class="part">${esc(p.title)}</h3><ol class="cards">${p.items
+            .map(
+              ([l, i]) =>
+                `<li><a href="#/${l.id}"><span class="num">${i + 1}</span><b>${esc(l.title)}${done.has(l.id) ? ' <span class="check">✓</span>' : ''}</b><span>${esc(l.summary)}</span></a></li>`,
+            )
+            .join('')}</ol>`,
+      )
+      .join('')}
     ${done.size ? '<p class="muted"><button class="link" id="reset-progress">Reset my progress</button></p>' : ''}`;
   const reset = document.getElementById('reset-progress');
   if (reset)
@@ -122,7 +175,7 @@ function exampleHTML(ex) {
   const rsMarked = new Set(links.map((l) => l.rs));
   const pyMarked = new Set(links.flatMap((l) => l.py));
   const rsLang = ex.rsLang || 'rust';
-  const play = rsLang === 'rust' && !ex.files ? `<a class="play" href="${playLink(ex.rs)}" target="_blank" rel="noopener">Open in Playground ↗</a>` : '';
+  const play = rsLang === 'rust' && !ex.files && !ex.run ? `<a class="play" href="${playLink(ex.rs)}" target="_blank" rel="noopener">Open in Playground ↗</a>` : '';
   return {
     links,
     html: `
@@ -135,12 +188,28 @@ function exampleHTML(ex) {
           ${codeBlock(ex.rs, rsLang, 'rs', rsMarked)}</figure>
       </div>
       ${links.length ? '<div class="note" aria-live="polite"><p class="muted">Hover over or tap a <span class="marker">marked</span> line to see what it means.</p></div>' : ''}
-      ${ex.out ? `<div class="output"><span>${ex.rsError ? 'Python prints' : ex.pyError ? 'Rust prints' : 'Both print'}</span><pre>${esc(ex.out)}</pre></div>` : ''}
+      ${ex.run ? runHTML(ex) : ex.out ? `<div class="output"><span>${ex.rsError ? 'Python prints' : ex.pyError ? 'Rust prints' : 'Both print'}</span><pre>${esc(ex.out)}</pre></div>` : ''}
       ${ex.pyError ? `<div class="output bad"><span>Python crashes at run time with</span><pre>${esc(ex.pyError)}</pre></div>` : ''}
       ${ex.rsError ? `<div class="output bad"><span>Rust compiler says</span><pre>${esc(ex.rsError)}</pre></div>` : ''}
       ${fixHTML(ex)}
     </section>`,
   };
+}
+
+// A terminal session: show the input files, the two commands, then what both programs print.
+function runHTML(ex) {
+  const r = ex.run;
+  const q = (a) => (/^[\w./-]+$/.test(a) ? a : `'${a}'`);
+  const env = Object.entries(r.env || {}).map(([k, v]) => `${k}=${q(v)} `).join('');
+  const args = (r.args || []).map(q).join(' ');
+  const stdin = r.stdin ? ` < ${r.stdin}` : '';
+  const files = Object.entries(r.files || {}).map(([name, text]) => `<span class="prompt">$ cat ${esc(name)}</span>\n${esc(text.replace(/\n$/, ''))}\n`).join('');
+  const lines = [`python main.py ${args}`.trim(), `cargo run -- ${args}`.trim().replace(/ --$/, '')].map((c) => `$ ${env}${c}${stdin}`);
+  const width = Math.max(...lines.map((l) => l.length));
+  const cmd = (i, who) => `<span class="prompt">${esc(lines[i].padEnd(width))}</span>   <span class="who"># ${who}</span>\n`;
+  const out = (ex.out ? esc(ex.out) + '\n' : '') + (r.stderr ? `<span class="err">${esc(r.stderr)}</span>   <span class="who"># to stderr</span>\n` : '');
+  const code = r.exitCode ? `<span class="prompt">$ echo $?</span>\n${r.exitCode}\n` : '';
+  return `<div class="output terminal"><span>Run it: both print the same</span><pre>${files}${cmd(0, 'Python')}${cmd(1, 'Rust')}${out}${code}</pre></div>`;
 }
 
 function fixHTML(ex) {
@@ -362,6 +431,7 @@ function route() {
   window.scrollTo(0, 0);
 }
 
+document.querySelector('.topbar .theme-slot').innerHTML = themeSwitch();
 document.getElementById('menu').onclick = () => document.body.classList.toggle('nav-open');
 window.addEventListener('hashchange', route);
 route();

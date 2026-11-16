@@ -6,7 +6,7 @@ LESSONS.push({
     <p>In Python any variable can be <code>None</code>, and you only find out when the program runs and something
     crashes. Rust puts "maybe missing" into the <b>type</b>: <code>Option&lt;i32&gt;</code> is either
     <code>Some(3)</code> or <code>None</code>.</p>
-    <p><code>Option</code> is just an enum with two variants, like the ones in lesson 8. That is why you handle it with
+    <p><code>Option</code> is just an enum with two variants, like the ones in lesson 10. That is why you handle it with
     <code>match</code>, and why the compiler knows when you forgot the <code>None</code> case. An
     <code>Option&lt;i32&gt;</code> is <b>not</b> an <code>i32</code>: you cannot add to it or print it as a number until
     you say what should happen when it is empty.</p>`,
@@ -164,7 +164,7 @@ LESSONS.push({
         [9, [7, 8], '<code>is_some()</code> returns <code>true</code> when there is a value. It reads as "is not None".'],
         [11, [9, 10], 'A plain <code>if</code> on a <code>bool</code>, so the <code>else</code> branch can handle the empty case, like Python\'s <code>else</code>.'],
         [15, 12, '<code>map</code> changes the value inside <code>Some</code> and keeps <code>None</code> as <code>None</code>. It is the <code>x * 2 if ... else None</code> line.'],
-        [16, 13, '<code>{doubled:?}</code> prints the whole <code>Option</code>, so an empty one shows as <code>None</code>. <code>:?</code> is the debug format from lesson 1.'],
+        [16, 13, '<code>{doubled:?}</code> prints the whole <code>Option</code>, so an empty one shows as <code>None</code>. <code>:?</code> is the debug format from lesson 3.'],
         [17, 14, '<code>unwrap_or(0)</code> finishes the job: a number or the default.'],
       ],
     },
@@ -174,7 +174,7 @@ LESSONS.push({
       <code>None</code>, return <code>None</code> from the whole function right away. It replaces the early
       <code>return None</code> checks that clutter Python code.</p>
       <p><code>let ... else</code> is the other new shape. Read it as "get the value out, or run this block", and that
-      block must leave the function. Lesson 10 covers <code>?</code> in more depth.</p>`,
+      block must leave the function. Lesson 12 covers <code>?</code> in more depth.</p>`,
       py: code`
         def second_word(text):
             parts = text.split()

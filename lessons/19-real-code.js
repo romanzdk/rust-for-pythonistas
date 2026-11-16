@@ -5,8 +5,7 @@ LESSONS.push({
   intro: `
     <p>Real code adds a few things the earlier lessons skipped: modules and <code>use</code>, attributes like
     <code>#[derive]</code>, and syntax you only need to <b>recognize</b>, like lifetimes. This lesson ends with a realistic
-    program that uses most of the course. Lessons 15 and 16 then cover the project around the code: <code>Cargo.toml</code>,
-    tests, builds and shipping.</p>`,
+    program that uses most of the course. It is the last lesson: if you can follow its program, you can follow a lot of everyday Rust.</p>`,
   examples: [
     {
       title: 'Modules: mod, pub and use',
@@ -75,7 +74,7 @@ LESSONS.push({
       out: 'banana',
       links: [
         [1, 1, "Read it as: <i>longest takes two borrowed strings and returns one of them</i>. The <code>'a</code> connects the output to the inputs."],
-        [2, 2, '<code>if</code> is an expression (lesson 3), like Python\'s <code>a if ... else b</code>.'],
+        [2, 2, '<code>if</code> is an expression (lesson 5), like Python\'s <code>a if ... else b</code>.'],
       ],
     },
     {
@@ -168,10 +167,10 @@ LESSONS.push({
         [1, 1, 'Import the formatting module, so the code below can write <code>fmt::Display</code>.'],
         [3, 4, '<code>#[...]</code> is an <i>attribute</i>, similar to a decorator. <code>derive(Debug)</code> generates <code>{:?}</code> printing for you.'],
         [4, [5, 6, 7], 'A struct with two typed fields, like the dataclass.'],
-        [9, 9, '<code>impl Display for Score</code> is Rust\'s <code>__str__</code>: it controls how <code>{}</code> prints a <code>Score</code> (lesson 12).'],
+        [9, 9, '<code>impl Display for Score</code> is Rust\'s <code>__str__</code>: it controls how <code>{}</code> prints a <code>Score</code> (lesson 14).'],
         [10, 9, 'The signature is the same every time, so you can skim past it.'],
         [11, 10, '<code>write!</code> is <code>format!</code> that writes into <code>f</code>.'],
-        [15, 13, 'Returns <code>Ok(Score)</code> or <code>Err(String)</code>. You can see from the signature that this can fail (lesson 10).'],
+        [15, 13, 'Returns <code>Ok(Score)</code> or <code>Err(String)</code>. You can see from the signature that this can fail (lesson 12).'],
         [16, [14, 15, 16], '<code>split_once</code> gives an <code>Option</code>. <code>.ok_or(...)</code> turns <code>None</code> into an error, and <code>?</code> returns that error early.'],
         [17, [17, 18], '<code>parse()</code> works out the target type (<code>u32</code>) from the struct field. <code>map_err(|_| ...)</code> replaces the error message. <code>|_|</code> is a closure that ignores its argument.'],
         [18, 19, '<code>Ok(...)</code> wraps the success value. <code>points</code> alone means <code>points: points</code>.'],

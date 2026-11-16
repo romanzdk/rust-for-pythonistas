@@ -15,7 +15,7 @@ LESSONS.push({
       constructor. You call it with <code>Type::name()</code>.</li>
     </ul>
     <p>Fields are read with a dot, the same as Python: <code>p.x</code>. There is no inheritance in Rust. Shared
-    behaviour comes from traits, in lesson 12.</p>`,
+    behaviour comes from traits, in lesson 14.</p>`,
   examples: [
     {
       title: 'A dataclass becomes a struct and an impl',
@@ -63,7 +63,7 @@ LESSONS.push({
         7
       `,
       links: [
-        [1, [4, 5, 6], 'A <code>struct</code> lists the fields and their types. This is the data half of the class. <code>pub</code> in front would make it visible to other files (modules, lesson 14).'],
+        [1, [4, 5, 6], 'A <code>struct</code> lists the fields and their types. This is the data half of the class. <code>pub</code> in front would make it visible to other files (modules, lesson 2).'],
         [6, 8, 'Everything you can <i>do</i> with a <code>Point</code> lives in an <code>impl</code> block. In Python these functions sit inside the class body.'],
         [7, 3, 'Rust has no automatic constructor, so you write a function called <code>new</code>. <code>Self</code> means "the type in this <code>impl</code> block", here <code>Point</code>. It plays the part of <code>__init__</code> from <code>@dataclass</code>.'],
         [8, null, '<code>Point { x, y }</code> builds the value. <code>x</code> and <code>y</code> are short for <code>x: x, y: y</code>: the argument fills the field with the same name.'],
@@ -164,8 +164,8 @@ LESSONS.push({
       `,
       links: [
         [1, [4, 5], 'This one line replaces several dataclass features. <code>PartialEq</code> gives <code>==</code> like <code>__eq__</code>. <code>Clone</code> gives <code>.clone()</code> like <code>copy.copy()</code>. <code>Debug</code> gives <code>println!("{:?}", value)</code>, which is like <code>repr()</code>; quiz 3 shows it.'],
-        [8, 9, 'A struct value is written with its field names. <code>String::from("hot")</code> makes an owned string, because <code>String</code> is not a literal (lesson 2).'],
-        [9, 10, '<code>a.clone()</code> makes a second value with the same fields. Without <code>Clone</code> this line does not compile, and plain <code>let b = a;</code> would move the value instead of copying it (lesson 11).'],
+        [8, 9, 'A struct value is written with its field names. <code>String::from("hot")</code> makes an owned string, because <code>String</code> is not a literal (lesson 4).'],
+        [9, 10, '<code>a.clone()</code> makes a second value with the same fields. Without <code>Clone</code> this line does not compile, and plain <code>let b = a;</code> would move the value instead of copying it (lesson 13).'],
         [10, 11, '<code>a == b</code> compares field by field, thanks to <code>PartialEq</code>. <code>if</code> can produce a value in Rust, so it can sit inside <code>println!</code>.'],
         [11, 12, 'A new value with different field values. Rust has no <code>replace()</code> for dataclasses: you write the value you want.'],
         [12, 13, 'The comparison is false here, so the second <code>if</code> picks "different".'],
@@ -205,7 +205,7 @@ LESSONS.push({
         [1, 1, 'A tuple struct: the type name and one unnamed field. The <code>;</code> at the end is easy to miss. It is a normal struct in every other way.'],
         [4, 5, 'Methods are written the same way as for a normal struct.'],
         [5, 6, '<code>self.0</code> is the first (and only) field. It is <code>self.value</code> in the Python version.'],
-        [10, 8, '<code>Meters(100.0)</code> builds it, like <code>Meters(100)</code>. The number needs a decimal point to be an <code>f64</code>, not an <code>i32</code> (lesson 2).'],
+        [10, 8, '<code>Meters(100.0)</code> builds it, like <code>Meters(100)</code>. The number needs a decimal point to be an <code>f64</code>, not an <code>i32</code> (lesson 4).'],
         [11, 9, '<code>{:.1}</code> prints one decimal place, the same as <code>:.1f</code> in an f-string.'],
       ],
     },
@@ -257,7 +257,7 @@ LESSONS.push({
         9
       `,
       links: [
-        [1, 1, 'The <code>struct</code> holds the data. <code>pub</code> here would make the type usable from other files (lesson 14).'],
+        [1, 1, 'The <code>struct</code> holds the data. <code>pub</code> here would make the type usable from other files (lesson 2).'],
         [6, 1, 'Both functions live in one <code>impl</code> block.'],
         [7, [6, 7], 'No <code>self</code> in the arguments, so this is an associated function: it is called on the type, not on a value. <code>@classmethod</code> in Python.'],
         [8, 8, '<code>Self</code> is the return type, and <code>Rectangle { ... }</code> is the value it returns. <code>cls(size, size)</code> does the same job.'],

@@ -81,7 +81,7 @@ LESSONS.push({
       links: [
         [1, null, 'A trait is a named list of methods. Think <code>typing.Protocol</code> or <code>abc.ABC</code>, but checked by the compiler.'],
         [2, null, 'Only the signature, ending in <code>;</code>. There is no body here: each type has to write its own. <code>&amp;self</code> is the instance, the <code>self</code> of Python.'],
-        [5, 1, 'An ordinary struct, as in lesson 7: just the data.'],
+        [5, 1, 'An ordinary struct, as in lesson 9: just the data.'],
         [9, null, '<code>impl Describe for Dog</code> is the promise "Dog can do Describe". Without this block, Dog cannot be used where a Describe is needed.'],
         [10, 5, 'The body of the method. <code>&amp;self</code> borrows the instance, so <code>self.name</code> is readable and nothing is moved.'],
         [15, 8, 'A second, unrelated type. It shares no base class with Dog, only the trait.'],
@@ -284,7 +284,7 @@ LESSONS.push({
       text: `<p><code>{}</code> in <code>println!</code> uses the <code>Display</code> trait, which is Python's
       <code>__str__</code>. <code>{:?}</code> uses <code>Debug</code>, which is <code>__repr__</code>. You write
       <code>Display</code> by hand; <code>Debug</code>, <code>Clone</code> and <code>PartialEq</code> can be generated
-      by <code>#[derive(...)]</code>, as you saw in lesson 7.</p>`,
+      by <code>#[derive(...)]</code>, as you saw in lesson 9.</p>`,
       py: code`
         import copy
 
@@ -454,7 +454,7 @@ LESSONS.push({
         [34, null, '<code>type Output</code> says what the <code>+</code> produces: here another Point.'],
         [36, 21, 'This is the method behind the <code>+</code> sign.'],
         [42, 26, '<code>Vec&lt;Box&lt;dyn Shape&gt;&gt;</code> is a list that may hold any type with <code>Shape</code>. <code>dyn</code> means the concrete type is only known at run time.'],
-        [46, 27, 'Iterating with <code>&amp;</code> borrows each box; nothing is moved out of the vector (lesson 11).'],
+        [46, 27, 'Iterating with <code>&amp;</code> borrows each box; nothing is moved out of the vector (lesson 13).'],
         [47, 28, '<code>s.area()</code> runs the implementation that belongs to the real type inside the box.'],
         [49, 29, 'Two Point values and a <code>+</code>: this calls <code>Add::add</code>.'],
         [50, 30, '<code>{p:?}</code> prints with Debug, the same shape as the Python <code>repr</code>.'],

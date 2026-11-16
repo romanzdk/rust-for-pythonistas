@@ -6,7 +6,7 @@ LESSONS.push({
     <p>In Python a function can fail without saying so. <code>int("x")</code> looks like any other call, then it
     raises <code>ValueError</code>, and you find out by running it or by reading the docs. Rust puts the failure in
     the <b>return type</b>: <code>Result&lt;T, E&gt;</code> means "either a value of type T, or an error of type E".</p>
-    <p><code>Result</code> is an enum with two variants, like the enums in lesson 8:</p>
+    <p><code>Result</code> is an enum with two variants, like the enums in lesson 10:</p>
     <ul>
       <li><code>Ok(value)</code>: it worked, here is the value.</li>
       <li><code>Err(error)</code>: it failed, here is the error.</li>
@@ -15,7 +15,7 @@ LESSONS.push({
     without opening the <code>Result</code> first, so nothing is silently ignored. Two tools open it:
     <code>match</code> when you handle both cases here, and <code>?</code> when you want the error to travel up to
     the caller, the way an exception does.</p>
-    <p><code>Option&lt;T&gt;</code> from lesson 9 is a close cousin: it is either <code>Some(value)</code> or
+    <p><code>Option&lt;T&gt;</code> from lesson 11 is a close cousin: it is either <code>Some(value)</code> or
     <code>None</code>, "a value or nothing". <code>Result</code> is "a value or an error", and the error can say what
     went wrong.</p>
     <p><code>panic!</code> is the other kind of failure: it stops the whole program right there, like a
@@ -171,7 +171,7 @@ LESSONS.push({
     {
       title: 'Your own error type is an enum',
       text: `<p>Standard errors like <code>ParseIntError</code> are fine until you need to say <i>why</i> something failed.
-      Then you write an enum, exactly like lesson 8, and use it as the <code>E</code> in <code>Result</code>. Each
+      Then you write an enum, exactly like lesson 10, and use it as the <code>E</code> in <code>Result</code>. Each
       variant is one kind of failure, and a variant can carry data.</p>`,
       py: code`
         class BadName(Exception):
@@ -223,7 +223,7 @@ LESSONS.push({
         too long: 8 letters
       `,
       links: [
-        [2, 1, 'Your error type is an ordinary enum. <code>#[derive(Debug)]</code> lets it be printed with <code>{:?}</code>, as in lesson 7.'],
+        [2, 1, 'Your error type is an ordinary enum. <code>#[derive(Debug)]</code> lets it be printed with <code>{:?}</code>, as in lesson 9.'],
         [4, null, 'This variant carries data: how long the name was. A Python exception carries its message the same way.'],
         [7, 4, 'The signature names the possible failure, so callers can see it without reading the body.'],
         [9, 6, '<code>return Err(...)</code> is <code>raise</code>: stop here and hand this error to the caller.'],

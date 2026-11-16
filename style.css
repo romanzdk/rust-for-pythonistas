@@ -27,7 +27,7 @@
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #161514;
     --surface: #1e1d1b;
     --code-bg: #232220;
@@ -54,6 +54,33 @@
     --m: #94e2d5;
     color-scheme: dark;
   }
+}
+:root[data-theme="dark"] {
+  --bg: #161514;
+  --surface: #1e1d1b;
+  --code-bg: #232220;
+  --text: #ebe7e0;
+  --muted: #a39e94;
+  --border: #36332f;
+  --accent: #fb923c;
+  --accent-soft: #2c1f16;
+  --py: #7aa7e6;
+  --ok: #4ade80;
+  --ok-soft: #13261a;
+  --warn: #facc15;
+  --warn-soft: #29240f;
+  --bad: #f87171;
+  --bad-soft: #2b1515;
+  --lit: #4a3a12;
+  --mark: #f59e0b;
+  --k: #cba6f7;
+  --s: #a6e3a1;
+  --n: #fab387;
+  --c: #7f849c;
+  --f: #89b4fa;
+  --t: #f9e2af;
+  --m: #94e2d5;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -227,3 +254,27 @@ pre.code { margin: 0; padding: 10px 0; overflow-x: auto; background: var(--code-
 .fix-out { margin: 0; border: 0; border-top: 1px solid var(--border); border-radius: 0; }
 .fix .pair:has(> :only-child) { grid-template-columns: 1fr; }
 .CodeMirror .cm-variable, .CodeMirror .cm-property, .CodeMirror .cm-operator { color: var(--text); }
+
+#nav .part { margin: 14px 0 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); }
+h3.part { margin: 28px 0 0; color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.terminal .prompt { color: var(--muted); }
+.terminal .who { color: var(--c); font-style: italic; }
+.terminal .err { color: var(--bad); }
+
+/* theme switch and links */
+.theme { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface); }
+.theme button { border: 0; border-radius: 0; padding: 5px 9px; font-size: 0.85rem; background: none; color: var(--muted); display: inline-flex; gap: 5px; align-items: center; }
+.theme button + button { border-left: 1px solid var(--border); }
+.theme button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.nav-foot { margin-top: 24px; padding-top: 14px; border-top: 1px solid var(--border); }
+.nav-foot .links { margin: 10px 0 0; font-size: 0.9rem; }
+.nav-foot .links a { color: var(--muted); }
+.nav-foot .links a:hover { color: var(--accent); }
+.topbar .theme-slot { margin-left: auto; }
+.topbar .theme span { display: none; }
+.site-foot { margin-left: 270px; padding: 20px 40px 40px; max-width: 1180px; color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--border); }
+.site-foot a { color: var(--muted); }
+.site-foot a:hover { color: var(--accent); }
+.hero .button + .button { margin-left: 8px; }
+@media (max-width: 860px) { .site-foot { margin-left: 0; padding: 20px 16px 32px; } }
+.topbar #menu { white-space: nowrap; }

@@ -380,7 +380,7 @@ LESSONS.push({
         [1, null, 'Imports PyO3. In <code>Cargo.toml</code>, <code>crate-type = ["cdylib"]</code> builds a shared library: the <code>.so</code> or <code>.pyd</code> file inside the wheel.'],
         [3, 4, '<code>#[pyfunction]</code> makes this callable from Python. PyO3 converts the Python <code>int</code> arguments to <code>i64</code> and the result back.'],
         [8, 2, '<code>#[pymodule]</code> defines what <code>import shop_fast</code> loads. The function name must match the module name.'],
-        [9, null, '<code>Bound&lt;\'_, PyModule&gt;</code> is "the Python module object". The <code>\'_</code> is a lifetime (lesson 14). <code>PyResult</code> is a <code>Result</code> whose error becomes a Python exception.'],
+        [9, null, '<code>Bound&lt;\'_, PyModule&gt;</code> is "the Python module object". The <code>\'_</code> is a lifetime (lesson 19). <code>PyResult</code> is a <code>Result</code> whose error becomes a Python exception.'],
         [10, 4, 'Registers <code>add</code> on the module, so <code>shop_fast.add</code> exists.'],
       ],
     },
