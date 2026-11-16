@@ -71,6 +71,16 @@ LESSONS.push({
       `,
       out: 'empty',
       rsError: 'error[E0308]: mismatched types',
+      rsFix: code`
+        fn main() {
+            let name = String::new();
+            if !name.is_empty() {
+                println!("has a name");
+            } else {
+                println!("empty");
+            }
+        }
+      `,
       links: [
         [2, 1, '<code>String::new()</code> makes an empty string.'],
         [3, 2, 'The compiler stops here: <code>if</code> wants a <code>bool</code> and a <code>String</code> is not one. This is the truthiness rule, enforced.'],

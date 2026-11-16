@@ -38,6 +38,15 @@ LESSONS.push({
       `,
       out: '[1, 2, 3, 4]',
       rsError: 'error[E0382]: borrow of moved value: `a`',
+      rsFix: code`
+        fn main() {
+            let mut a = vec![1, 2, 3];
+            let b = &mut a;
+            b.push(4);
+            println!("{:?}", a);
+        }
+      `,
+      fixNote: '<code>let b = &amp;mut a;</code> lends <code>a</code> to <code>b</code> for changing, so it behaves like the Python code. If you want a separate copy instead, use <code>a.clone()</code> (next example).',
       links: [
         [2, 1, '<code>a</code> owns the vector.'],
         [3, 2, 'Ownership <b>moves</b> to <code>b</code>. From here on, <code>a</code> is empty and the compiler will not let you use it.'],
@@ -170,6 +179,21 @@ LESSONS.push({
       `,
       out: `['Ann', 'Bob', 'Cid']`,
       rsError: 'error[E0502]: cannot borrow `names` as mutable because it is also borrowed as immutable',
+      rsFix: code`
+        fn main() {
+            let mut names = vec![String::from("Ann"), String::from("Bob")];
+            let mut extra = Vec::new();
+            for name in &names {
+                if name == "Ann" {
+                    extra.push(String::from("Cid"));
+                }
+            }
+            names.extend(extra);
+            println!("{:?}", names);
+        }
+      `,
+      fixOut: '["Ann", "Bob", "Cid"]',
+      fixNote: 'Collect the changes while reading, then apply them after the loop, when the read borrow has ended.',
       links: [
         [3, 2, '<code>&amp;names</code>: the loop borrows the list to read it, until the loop ends.'],
         [5, 4, 'Changing it here needs a <code>&amp;mut</code> borrow while the read borrow is still active, so it is rejected.'],
@@ -245,6 +269,24 @@ LESSONS.push({
         summarize(&data);
         normalize(&mut data);
         print_all(&data);
+      `,
+      harness: code`
+        fn summarize(data: &[i32]) -> i32 {
+            data.iter().sum()
+        }
+
+        fn normalize(data: &mut Vec<i32>) {
+            data.sort();
+        }
+
+        fn print_all(data: &[i32]) {
+            println!("{data:?}");
+        }
+
+        fn main() {
+            let mut data = vec![3, 1, 2];
+            {code}
+        }
       `,
       options: ['<code>normalize(&amp;mut data)</code>', '<code>summarize(&amp;data)</code>', '<code>print_all(&amp;data)</code>', 'All three'],
       answer: 0,

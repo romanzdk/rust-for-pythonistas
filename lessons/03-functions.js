@@ -195,6 +195,15 @@ LESSONS.push({
       `,
       out: '8',
       rsError: 'error[E0308]: mismatched types',
+      rsFix: code`
+        fn double(n: i32) -> i32 {
+            n * 2
+        }
+
+        fn main() {
+            println!("{}", double(4));
+        }
+      `,
       links: [
         [1, 1, 'The signature promises an <code>i32</code>.'],
         [2, 2, 'The <code>;</code> throws the value away, so this line is a statement, and the function body now ends with <code>()</code>.'],

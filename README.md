@@ -32,7 +32,10 @@ node scripts/check.mjs            # all lessons
 node scripts/check.mjs ownership  # one lesson
 ```
 
-You need `rustc` (stable, edition 2024), `python3` and `node`. CI runs the same check on every push.
+You need `rustc` and `cargo` (stable, edition 2024), `python3`, `uv`, `node`, and network access: the examples about
+`Cargo.toml`, `cargo test`, publishing and PyO3 are checked by running the real tools (`cargo`, `uv`, `pytest`,
+`maturin`) on them. Examples that fail on purpose must come with a fixed version, which is checked too.
+CI runs the same check on every push.
 
 ## Add or edit a lesson
 
@@ -52,16 +55,22 @@ LESSONS.push({
     out: code`...`,                  // what both print (checked)
     links: [[rsLine, pyLine | [pyLines] | null, 'note HTML']],  // 1-based line numbers
     rsError: 'error[E0382]: ...',    // optional: Rust must fail to compile; may be the full rustc output
-                                     // (its error/help lines are checked)
-    pyError: 'TypeError: ...',       // optional: Python must crash with this text
-    // For files or commands instead of programs: not run, just shown.
-    // files: true, pyLabel: 'pyproject.toml', pyLang: 'ini', rsLabel: 'Cargo.toml', rsLang: 'ini'
-    // test: true  → rs is a test module (no main) that must pass `cargo test`; py just has to run
+                                     // (its error/help lines are checked). Then rsFix is required.
+    pyError: 'TypeError: ...',       // optional: Python must crash with this text. Then pyFix is required.
+    rsFix: code`...`, pyFix: code`...`,  // the working version, shown under "Show the fixed version"
+    fixOut: code`...`,               // what the fixes print, if different from out
+    // test: true → both sides are test files: pytest and `cargo test` must pass.
+    // Files or commands instead of a program (Cargo.toml, terminal):
+    // files: true, pyLabel: 'pyproject.toml', pyLang: 'ini', rsLabel: 'Cargo.toml', rsLang: 'ini',
+    // check: code`bash script`  → runs in an empty folder; $RS / $PY hold the shown text,
+    //                              split_files "$RS" writes a "// path"-separated listing out as files.
+    // diagram: true             → a picture such as a folder tree; nothing to run.
   }],
   quiz: [
     { type: 'output', q: 'What does this print?', code: code`...`, options: ['a', 'b'], answer: 0, explain: '...' },
     { type: 'compiles', q: 'Does this compile?', code: code`...`, answer: false, explain: '...' },  // test: true → compiled as `cargo test`
-    { type: 'choice', q: '...', code: code`...` /* optional */, options: ['...'], answer: 1, explain: '...' },
+    { type: 'choice', q: '...', code: code`...` /* optional, must run, or set rsError */, options: ['...'], answer: 1, explain: '...' },
+    // a code fragment gets a harness: harness: code`fn main() { {code} }`
   ],
   exercise: { task: `<p>HTML</p>`, starter: code`...`, solution: code`...`, expected: code`...`, hint: '...' },
   // or a test exercise: no main, no expected; it passes when `cargo test` passes

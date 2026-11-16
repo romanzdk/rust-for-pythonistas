@@ -62,6 +62,55 @@ LESSONS.push({
     },
     {
       title: 'Reading cargo test output',
+      check: code`
+        mkdir -p rs py/tests
+        cd rs
+        cargo new --quiet --vcs none --lib shop
+        cd shop
+        cat > src/lib.rs <<'EOF'
+        pub fn add(a: i32, b: i32) -> i32 {
+            a + b
+        }
+
+        #[cfg(test)]
+        mod tests {
+            use super::*;
+
+            #[test]
+            fn adds() {
+                assert_eq!(add(2, 3), 5);
+            }
+
+            #[test]
+            fn negative() {
+                assert_eq!(add(-2, -3), -6);
+            }
+        }
+        EOF
+        if cargo test > out.txt 2>&1; then echo "cargo test should fail"; exit 1; fi
+        grep -v -e '^[$] ' -e 'Compiling' -e 'Finished' -e 'Running' -e 'panicked at' -e 'test result' "$RS" | while IFS= read -r line; do
+          grep -qxF -- "$line" out.txt || { echo "not in cargo test output: [$line]"; cat out.txt; exit 1; }
+        done
+        grep -q "panicked at src/lib.rs:16:9:" out.txt
+        grep -qF "test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out" out.txt
+        cd ../../py
+        cat > tests/test_math.py <<'EOF'
+        def add(a: int, b: int) -> int:
+            return a + b
+
+
+        def test_add():
+            assert add(2, 3) == 5
+
+
+        def test_negative():
+            assert add(-2, -3) == -6
+        EOF
+        if uvx --quiet pytest -p no:cacheprovider > out.txt 2>&1; then echo "pytest should fail"; exit 1; fi
+        for line in 'collected 2 items' 'tests/test_math.py .F' '>       assert add(-2, -3) == -6' 'E       assert -5 == -6' 'tests/test_math.py:10: AssertionError' '1 failed, 1 passed'; do
+          grep -qF -- "$line" out.txt || { echo "not in pytest output: [$line]"; cat out.txt; exit 1; }
+        done
+      `,
       text: `<p>Here is the output when the second test expects <code>-6</code> instead of <code>-5</code>. Both tools show the same
       things, in a different layout: what ran, what failed, where, and the two values that differ.</p>`,
       files: true,
@@ -124,6 +173,19 @@ LESSONS.push({
     },
     {
       title: 'Integration tests and doc tests',
+      check: code`
+        mkdir rs py
+        cd rs
+        cargo new --quiet --vcs none --lib shop
+        cd shop
+        split_files "$RS"
+        cargo test > out.txt 2>&1 || { cat out.txt; exit 1; }
+        grep -q 'test add_from_outside ... ok' out.txt
+        grep -q 'test src/lib.rs - add (line 3) ... ok' out.txt
+        cd ../../py
+        split_files "$PY"
+        PYTHONPATH=src uvx --quiet pytest -q -p no:cacheprovider --doctest-modules src tests
+      `,
       text: `<p>A file in <code>tests/</code> is compiled as a separate crate. It can only use what your library makes
       <code>pub</code>, exactly like a user who installed it. Doc tests are code blocks inside <code>///</code> comments.
       <code>cargo test</code> compiles and runs them, and docs.rs shows them as examples.</p>`,
@@ -178,6 +240,11 @@ LESSONS.push({
     },
     {
       title: 'Debug vs release builds',
+      check: code`
+        mkdir rs py
+        (cd rs && cargo new --quiet shop && cd shop && source "$RS")
+        (cd py && uv init --quiet shop && cd shop && source "$PY")
+      `,
       text: `<p><code>cargo build</code> and <code>cargo run</code> make a <b>debug</b> build. It compiles fast, runs slowly, and
       checks for number overflow. <code>--release</code> turns on optimizations. Compiling takes longer, but the program
       often runs many times faster. Always measure speed with <code>--release</code>. A slow debug build doesn't tell you anything.</p>
@@ -191,11 +258,11 @@ LESSONS.push({
       rsLabel: 'Terminal · Rust',
       rsLang: 'bash',
       py: code`
-        python -m shop
+        uv run shop
         uv build
         ls dist/
         # shop-0.1.0-py3-none-any.whl  (needs Python + deps)
-        pip install dist/shop-0.1.0-py3-none-any.whl
+        uv pip install dist/shop-0.1.0-py3-none-any.whl
       `,
       rs: code`
         cargo run
@@ -213,6 +280,16 @@ LESSONS.push({
     },
     {
       title: 'Publishing and installing',
+      check: code`
+        export CARGO_INSTALL_ROOT="$PWD/tools/cargo" UV_TOOL_DIR="$PWD/tools/uv" UV_TOOL_BIN_DIR="$PWD/tools/bin"
+        cargo() { if [ "$1" = publish ]; then command cargo publish --dry-run --allow-dirty; else command cargo "$@"; fi; }
+        uv() { if [ "$1" = publish ]; then command uv publish --dry-run; else command uv "$@"; fi; }
+        mkdir rs py
+        (cd rs && command cargo new --quiet --vcs none shop && cd shop && source "$RS")
+        test -x tools/cargo/bin/rg
+        (cd py && command uv init --quiet shop && cd shop && source "$PY")
+        test -x tools/bin/ruff
+      `,
       text: `<p>crates.io is Rust's PyPI. One difference: it stores <b>source code</b>, not built files like wheels. Whoever
       depends on your crate compiles it on their own machine. That's why the first build of a project takes a while.
       Command-line tools are installed with <code>cargo install</code>, which compiles them into
@@ -242,6 +319,36 @@ LESSONS.push({
     },
     {
       title: 'Rust inside a Python package',
+      check: code`
+        mkdir src
+        cp "$RS" src/lib.rs
+        cat > Cargo.toml <<'EOF'
+        [package]
+        name = "shop-fast"
+        version = "0.1.0"
+        edition = "2024"
+
+        [lib]
+        name = "shop_fast"
+        crate-type = ["cdylib"]
+
+        [dependencies]
+        pyo3 = "0.30"
+        EOF
+        cat > pyproject.toml <<'EOF'
+        [build-system]
+        requires = ["maturin>=1.9,<2"]
+        build-backend = "maturin"
+
+        [project]
+        name = "shop-fast"
+        version = "0.1.0"
+        EOF
+        uv venv --quiet
+        uvx --quiet maturin build --release --quiet --interpreter .venv/bin/python --out dist
+        uv pip install --quiet dist/*.whl
+        test "$(.venv/bin/python "$PY")" = 5
+      `,
       text: `<p>Rust code can be shipped as a normal Python package. <b>PyO3</b> connects Rust to Python, and
       <b>maturin</b> builds the wheel: <code>maturin develop</code> installs it into your current virtual environment,
       and <code>maturin build --release</code> makes wheels to publish. pydantic-core, polars and orjson are built this way.

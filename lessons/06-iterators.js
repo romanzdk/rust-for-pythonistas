@@ -239,8 +239,8 @@ LESSONS.push({
       code: code`
         fn main() {
             let xs = vec![3, -1, 4];
-            let kept: Vec<i32> = xs.iter().filter(|x| **x > 0).collect();
-            println!("{:?}", kept);
+            let kept = xs.iter().filter(|x| **x > 0).count();
+            println!("{kept}");
         }
       `,
       options: [

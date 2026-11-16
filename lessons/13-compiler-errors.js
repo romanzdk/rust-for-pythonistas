@@ -32,6 +32,17 @@ LESSONS.push({
         }
       `,
       pyError: 'TypeError: can only concatenate str (not "int") to str',
+      pyFix: code`
+        age: int = int("42")
+        print(age + 1)
+      `,
+      rsFix: code`
+        fn main() {
+            let age: u32 = "42".parse().unwrap();
+            println!("{}", age + 1);
+        }
+      `,
+      fixOut: '43',
       rsError: code`
         error[E0308]: mismatched types
          --> src/main.rs:2:20
@@ -73,6 +84,19 @@ LESSONS.push({
         }
       `,
       out: 'Hello, ann',
+      rsFix: code`
+        fn greet(name: &str) {
+            if name == "admin" {
+                println!("Welcome back, {name}");
+            } else {
+                println!("Hello, {name}");
+            }
+        }
+
+        fn main() {
+            greet("ann");
+        }
+      `,
       rsError: code`
         error[E0425]: cannot find value \`nmae\` in this scope
          --> src/main.rs:3:34
@@ -110,6 +134,18 @@ LESSONS.push({
       out: code`
         2 names
         ['Ann', 'Bob']
+      `,
+      rsFix: code`
+        fn main() {
+            let names = vec!["Ann", "Bob"];
+            let backup = names.clone();
+            println!("{} names", names.len());
+            println!("{:?}", backup);
+        }
+      `,
+      fixOut: code`
+        2 names
+        ["Ann", "Bob"]
       `,
       rsError: code`
         error[E0382]: borrow of moved value: \`names\`
@@ -151,6 +187,14 @@ LESSONS.push({
         }
       `,
       out: `['Ann']`,
+      rsFix: code`
+        fn main() {
+            let mut names = Vec::new();
+            names.push("Ann");
+            println!("{:?}", names);
+        }
+      `,
+      fixOut: '["Ann"]',
       rsError: code`
         error[E0596]: cannot borrow \`names\` as mutable, as it is not declared as mutable
          --> src/main.rs:3:5
@@ -185,6 +229,19 @@ LESSONS.push({
         }
       `,
       pyError: `AttributeError: 'list' object has no attribute 'length'`,
+      pyFix: code`
+        words = ["a", "b"]
+        n = len(words)
+        print(n)
+      `,
+      rsFix: code`
+        fn main() {
+            let words = vec!["a", "b"];
+            let n = words.len();
+            println!("{n}");
+        }
+      `,
+      fixOut: '2',
       rsError: code`
         error[E0599]: no method named \`length\` found for struct \`Vec<&str>\` in the current scope
          --> src/main.rs:3:19
@@ -261,6 +318,7 @@ LESSONS.push({
         'No error',
       ],
       answer: 0,
+      rsError: 'error[E0384]',
       explain: '<code>total</code> is not <code>mut</code> (lesson 1). The help line will suggest <code>let mut total = 0;</code>.',
     },
   ],
