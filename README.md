@@ -10,7 +10,7 @@ A free, interactive course: Python and Rust side by side, quizzes, and exercises
 
 [![check](https://github.com/romanzdk/rust-for-pythonistas/actions/workflows/check.yml/badge.svg)](https://github.com/romanzdk/rust-for-pythonistas/actions/workflows/check.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-![21 lessons](https://img.shields.io/badge/lessons-21-orange)
+![22 lessons](https://img.shields.io/badge/lessons-22-orange)
 ![Rust edition 2024](https://img.shields.io/badge/Rust-edition_2024-b7410e?logo=rust)
 ![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-3776ab?logo=python&logoColor=white)
 
@@ -86,6 +86,7 @@ Examples that fail on purpose show the real compiler error, and you can open the
 |---|---|---|
 | 20 | [Memory without a garbage collector](https://romanzdk.github.io/rust-for-pythonistas/#/memory) | CPython's reference counting and `gc` vs owners and `Drop`, stack and heap, `Box` |
 | 21 | [Shared ownership: Rc, RefCell and Weak](https://romanzdk.github.io/rust-for-pythonistas/#/shared) | Python's shared objects in Rust, changing shared data, and why cycles leak without `Weak` |
+| 22 | [Threads without a GIL](https://romanzdk.github.io/rust-for-pythonistas/#/threads) | `thread::spawn`, `Arc<Mutex<T>>`, channels, scoped threads, and why data races don't compile |
 
 ## Every example is checked
 
