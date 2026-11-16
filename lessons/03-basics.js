@@ -211,6 +211,49 @@ LESSONS.push({
     `,
     hint: 'The compiler error says "consider making this binding mutable". Which keyword makes a variable changeable?',
   },
+  breaks: [
+    `<code>let</code> always makes a new variable. Python's <code>x = x + 1</code> changes the one <code>x</code>. In Rust,
+      <code>let x = x + 1;</code> makes a second <code>x</code> that hides the first (shadowing), and it may even have a different
+      type. To change a value in place, write <code>let mut x</code> once, then <code>x = x + 1;</code>.`,
+    `Variables are read-only unless you say <code>mut</code>. Python has no read-only variables at all, only conventions like
+      <code>UPPER_CASE</code> names.`,
+    `A variable lives until the <code>}</code> that closes its block. A variable created inside an <code>if</code> or a loop is
+      gone after it. In Python it stays visible for the rest of the function.`,
+    `<code>println!</code> is a macro, so its format string must be written right there in quotes. You can't keep a template in
+      a variable and fill it in later, the way Python's <code>template.format(x)</code> does.`,
+  ],
+  translate: {
+    py: code`
+      count = 3
+      print(f"count is {count}")
+      count = count * 2
+      print(f"count is {count}")
+      count += 1
+      print(f"count is {count}")
+    `,
+    starter: code`
+      fn main() {
+          let count = 3;
+      }
+    `,
+    solution: code`
+      fn main() {
+          let mut count = 3;
+          println!("count is {count}");
+          count = count * 2;
+          println!("count is {count}");
+          count += 1;
+          println!("count is {count}");
+      }
+    `,
+    expected: code`
+      count is 3
+      count is 6
+      count is 7
+    `,
+    hint: `The value changes, so the variable needs <code>mut</code>. <code>println!("count is {count}");</code> works like the
+      f-string.`,
+  },
   cheat: [
     ['print("hi")', 'println!("hi");'],
     ['print(f"{x} and {y}")', 'println!("{x} and {y}");'],

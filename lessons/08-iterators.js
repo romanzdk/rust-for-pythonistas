@@ -291,6 +291,51 @@ LESSONS.push({
     `,
     hint: 'Write the type before the value: <code>let cheap: Vec&lt;i32&gt; = ...</code>. The other way is to name the type on the call itself: <code>.collect::&lt;Vec&lt;_&gt;&gt;()</code>. The <code>::&lt;...&gt;</code> is called the turbofish, and the <code>_</code> means "you work out the inner type".',
   },
+  breaks: [
+    `A chain does nothing until you consume it. <code>xs.iter().map(...)</code> on its own runs no code (the compiler warns
+      you). A list comprehension runs right away; a Rust chain is more like a generator expression.`,
+    `<code>.iter()</code> hands out references. That's why closures see <code>&amp;x</code>, or even <code>&amp;&amp;x</code>
+      inside <code>filter</code>, and you write <code>*x</code> or <code>**x</code>. Python always hands you the value.`,
+    `<code>collect()</code> has to be told what to build. In Python the brackets say it: <code>[...]</code> or <code>{...}</code>.
+      In Rust you write the type: <code>Vec&lt;_&gt;</code>, <code>HashMap&lt;_, _&gt;</code> or <code>String</code>.`,
+    `A closure that changes a variable from outside needs that variable to be <code>mut</code>, and the closure too:
+      <code>let mut add = |x| total += x;</code>. Python needs <code>nonlocal</code> for the same thing.`,
+  ],
+  translate: {
+    py: code`
+      words = ["apple", "kiwi", "banana", "fig"]
+      lengths = [len(w) for w in words]
+      long_words = [w for w in words if len(w) > 4]
+      print(lengths)
+      print(", ".join(long_words))
+      print(sum(lengths))
+    `,
+    starter: code`
+      fn main() {
+          let words = vec!["apple", "kiwi", "banana", "fig"];
+      }
+    `,
+    solution: code`
+      fn main() {
+          let words = vec!["apple", "kiwi", "banana", "fig"];
+          let lengths: Vec<usize> = words.iter().map(|w| w.len()).collect();
+          let long_words: Vec<&str> = words.iter().filter(|w| w.len() > 4).copied().collect();
+          println!("{:?}", lengths);
+          println!("{}", long_words.join(", "));
+          let total: usize = lengths.iter().sum();
+          println!("{total}");
+      }
+    `,
+    expected: code`
+      [5, 4, 6, 3]
+      apple, banana
+      18
+    `,
+    hint: `Each comprehension is a <code>.iter()</code> chain ending in <code>.collect()</code>. <code>.iter()</code> hands out
+      references, so add <code>.copied()</code> before <code>collect()</code> to get plain <code>&amp;str</code> values; then
+      <code>long_words.join(", ")</code> works like Python's <code>", ".join(...)</code>. <code>sum</code> needs a type:
+      <code>let total: usize = ...</code>.`,
+  },
   cheat: [
     ['[x * 2 for x in xs]', 'xs.iter().map(|x| x * 2).collect::<Vec<_>>()'],
     ['[x for x in xs if x > 0]', 'xs.iter().filter(|x| **x > 0).collect::<Vec<_>>()'],

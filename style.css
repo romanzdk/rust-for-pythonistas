@@ -241,7 +241,7 @@ pre.code { margin: 0; padding: 10px 0; overflow-x: auto; background: var(--code-
 .cheat { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
 .cheat th { text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 8px 12px; border-bottom: 1px solid var(--border); }
 .cheat th:first-child { color: var(--py); }
-.cheat th:last-child { color: var(--accent); }
+.cheat th:nth-child(2) { color: var(--accent); }
 .cheat td { padding: 6px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
 .cheat code.inline { white-space: pre; }
 
@@ -278,3 +278,30 @@ h3.part { margin: 28px 0 0; color: var(--accent); font-size: 0.85rem; text-trans
 .hero .button + .button { margin-left: 8px; }
 @media (max-width: 860px) { .site-foot { margin-left: 0; padding: 20px 16px 32px; } }
 .topbar #menu { white-space: nowrap; }
+
+/* where the analogy breaks, translate, phrasebook */
+.breaks { margin: 20px 0 8px; padding: 12px 18px; border: 1px solid var(--warn); border-left-width: 4px; border-radius: 10px; background: var(--warn-soft); }
+.breaks h3 { margin: 0 0 6px; font-size: 1rem; }
+.breaks ul { margin: 0; padding-left: 1.2em; }
+.breaks li { margin: 6px 0; }
+.breaks code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 0.9em; }
+.exercise > .panel { margin: 12px 0 0; }
+.why { margin-top: 18px; padding: 10px 14px; border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0 8px 8px 0; color: var(--muted); }
+.why span { white-space: nowrap; }
+.hero .button { margin-top: 6px; }
+#nav .phrase-link { display: block; margin: 0 0 6px; padding: 5px 8px; border-radius: 6px; font-size: 0.9rem; color: var(--text); text-decoration: none; border: 1px solid var(--border); }
+#nav .phrase-link:hover { background: var(--code-bg); }
+#nav .phrase-link[aria-current] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+#phrase-search { width: 100%; max-width: 520px; padding: 9px 12px; font: inherit; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); }
+.cheat td a { white-space: nowrap; color: var(--muted); }
+.cheat td a:hover { color: var(--accent); }
+.lead code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 0.9em; }
+@media (max-width: 700px) {
+  .phrases, .phrases tbody { display: block; }
+  .phrases thead { display: none; }
+  .phrases tr { display: block; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .phrases td { display: block; border: 0; padding: 2px 12px; overflow-x: auto; }
+  .phrases td:nth-child(1)::before, .phrases td:nth-child(2)::before { display: block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+  .phrases td:nth-child(1)::before { content: "Python"; color: var(--py); }
+  .phrases td:nth-child(2)::before { content: "Rust"; color: var(--accent); }
+}

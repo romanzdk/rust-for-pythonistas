@@ -321,6 +321,67 @@ LESSONS.push({
     expected: '6 words in: borrow it, do not take it',
     hint: 'Change the parameter to <code>text: &amp;str</code> (a borrowed string) and call it with <code>count_words(&amp;note)</code>.',
   },
+  breaks: [
+    `Assignment moves instead of sharing. <code>b = a</code> in Python gives two names for one list. In Rust,
+      <code>let b = a;</code> moves the <code>Vec</code> to <code>b</code>, and <code>a</code> can't be used any more. Small values
+      like numbers and <code>bool</code> are copied instead.`,
+    `Passing a value to a function moves it too. <code>f(items)</code> gives <code>items</code> away for good. Pass
+      <code>&amp;items</code> to lend it, or <code>&amp;mut items</code> to let the function change it.`,
+    `Many readers or one writer, never both at once. Python lets any number of names change the same list. This rule is why
+      changing a <code>Vec</code> while you loop over it doesn't compile.`,
+    `<code>.clone()</code> is a real copy, not a new name. For a <code>Vec</code> of <code>String</code>s it copies every string.
+      That's fine for small data, but it isn't free like Python's <code>b = a</code>.`,
+    `No garbage collector. Memory is freed at the <code>}</code> where its owner ends, at a point you can see in the code, not
+      "some time later".`,
+  ],
+  translate: {
+    py: code`
+      def add_tax(prices: list[float]) -> None:
+          for i in range(len(prices)):
+              prices[i] = prices[i] * 1.2
+
+
+      def total(prices: list[float]) -> float:
+          return sum(prices)
+
+
+      prices = [10.0, 20.0, 5.0]
+      add_tax(prices)
+      print(prices)
+      print(f"total: {total(prices):.2f}")
+    `,
+    starter: code`
+      // Write add_tax and total here. One changes the list, one only reads it.
+
+      fn main() {
+          let prices = vec![10.0, 20.0, 5.0];
+      }
+    `,
+    solution: code`
+      fn add_tax(prices: &mut Vec<f64>) {
+          for i in 0..prices.len() {
+              prices[i] = prices[i] * 1.2;
+          }
+      }
+
+      fn total(prices: &[f64]) -> f64 {
+          prices.iter().sum()
+      }
+
+      fn main() {
+          let mut prices = vec![10.0, 20.0, 5.0];
+          add_tax(&mut prices);
+          println!("{:?}", prices);
+          println!("total: {:.2}", total(&prices));
+      }
+    `,
+    expected: code`
+      [12.0, 24.0, 6.0]
+      total: 42.00
+    `,
+    hint: `<code>add_tax</code> changes the list, so it takes <code>&amp;mut Vec&lt;f64&gt;</code> and you call it with
+      <code>&amp;mut prices</code>. <code>total</code> only reads, so <code>&amp;[f64]</code> and <code>&amp;prices</code> are enough.`,
+  },
   cheat: [
     ['b = a  # same list, two names', 'let b = a;  // moved: a is unusable now'],
     ['b = a.copy()', 'let b = a.clone();'],

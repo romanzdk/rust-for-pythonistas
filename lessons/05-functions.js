@@ -315,6 +315,61 @@ LESSONS.push({
     `,
     hint: 'The function promises a <code>u32</code> but ends with a statement, so it gives back <code>()</code>. Look at the last line of the body: the <code>;</code> is the problem.',
   },
+  breaks: [
+    `No default values, no keyword arguments, no <code>*args</code> or <code>**kwargs</code>. Every call passes every parameter,
+      in order. Where Python uses a default, Rust code often has a second function or takes an <code>Option</code> (lesson 11).`,
+    `One semicolon changes the result. The last line without <code>;</code> is the return value. Add a <code>;</code> and the
+      function returns <code>()</code> instead, which doesn't compile if it promised an <code>i32</code>.`,
+    `The types are checked, not just written down. A Python hint like <code>x: int</code> doesn't stop <code>f("5")</code> at run
+      time. In Rust that call doesn't compile.`,
+    `A function inside a function can't see the outer function's variables. Python's nested functions can read them. In Rust
+      only closures (lesson 8) can.`,
+  ],
+  translate: {
+    py: code`
+      def clamp(x: int, low: int, high: int) -> int:
+          if x < low:
+              return low
+          if x > high:
+              return high
+          return x
+
+
+      print(clamp(5, 0, 10))
+      print(clamp(-3, 0, 10))
+      print(clamp(42, 0, 10))
+    `,
+    starter: code`
+      // Write clamp here.
+
+      fn main() {
+      }
+    `,
+    solution: code`
+      fn clamp(x: i32, low: i32, high: i32) -> i32 {
+          if x < low {
+              return low;
+          }
+          if x > high {
+              return high;
+          }
+          x
+      }
+
+      fn main() {
+          println!("{}", clamp(5, 0, 10));
+          println!("{}", clamp(-3, 0, 10));
+          println!("{}", clamp(42, 0, 10));
+      }
+    `,
+    expected: code`
+      5
+      0
+      10
+    `,
+    hint: `The early exits are <code>return low;</code> and <code>return high;</code>. The last line is just <code>x</code>, with no
+      <code>return</code> and no semicolon.`,
+  },
   cheat: [
     ['def add(a: int, b: int) -> int:', 'fn add(a: i32, b: i32) -> i32 {'],
     ['return a + b', 'a + b   // last expression, no semicolon'],

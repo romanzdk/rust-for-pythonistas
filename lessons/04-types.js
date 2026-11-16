@@ -303,6 +303,54 @@ LESSONS.push({
     `,
     hint: 'Two integers divided give an integer, so 18 / 4 is 4. Turn both into <code>f64</code> with <code>as</code> before you divide.',
   },
+  breaks: [
+    `Integers have a fixed size and can overflow. Python's <code>int</code> grows as big as it needs. A <code>u8</code> holds 0 to
+      255: going past that panics in a debug build and silently wraps around in a release build.`,
+    `Number types don't mix. <code>2 * 1.5</code> just works in Python. In Rust, multiplying an <code>i32</code> by an
+      <code>f64</code> doesn't compile until you convert one of them with <code>as</code>.`,
+    `<code>as</code> never fails, even when the value doesn't fit: if <code>n</code> is 300, <code>n as u8</code> quietly gives 44.
+      Python numbers have no such limit, so they never lose digits like this.`,
+    `You can't index a string by position. <code>s[0]</code> doesn't compile, because a Rust string is UTF-8 bytes and one
+      character can take several bytes. Use <code>s.chars().next()</code> or <code>s.chars().nth(i)</code>.`,
+    `There are two string types. Python has one <code>str</code>. Rust has <code>String</code> (owned, can grow) and
+      <code>&amp;str</code> (a borrowed view).`,
+  ],
+  translate: {
+    py: code`
+      price = 19.99
+      qty = 3
+      total = price * qty
+      print(f"total: {total:.2f}")
+
+      name = "  Ada Lovelace  "
+      print(name.strip().upper())
+      print(len("héllo"))
+    `,
+    starter: code`
+      fn main() {
+          let price: f64 = 19.99;
+      }
+    `,
+    solution: code`
+      fn main() {
+          let price: f64 = 19.99;
+          let qty: i32 = 3;
+          let total = price * qty as f64;
+          println!("total: {total:.2}");
+
+          let name = "  Ada Lovelace  ";
+          println!("{}", name.trim().to_uppercase());
+          println!("{}", "héllo".chars().count());
+      }
+    `,
+    expected: code`
+      total: 59.97
+      ADA LOVELACE
+      5
+    `,
+    hint: `Multiply with <code>price * qty as f64</code>. <code>{total:.2}</code> rounds to 2 places, like <code>:.2f</code>. On the
+      last line, <code>"héllo".len()</code> is 6 (bytes): count characters with <code>.chars().count()</code>.`,
+  },
   cheat: [
     ['x = 5  ·  ratio = 0.5', 'let x: i32 = 5;  ·  let ratio: f64 = 0.5;'],
     ['n = 200   # 0..255', 'let n: u8 = 200;'],

@@ -96,7 +96,8 @@ for (const l of lessons) {
   const where = (s) => `[${l.id}] ${s}`;
   const fail = (s) => errors.push(where(s));
   const tasks = [];
-  for (const f of ['id', 'title', 'summary', 'intro', 'examples', 'quiz', 'exercise', 'cheat']) if (!l[f]) fail(`missing "${f}"`);
+  for (const f of ['id', 'title', 'summary', 'intro', 'examples', 'quiz', 'exercise', 'breaks', 'cheat']) if (!l[f]) fail(`missing "${f}"`);
+  if (l.breaks && !(Array.isArray(l.breaks) && l.breaks.length && l.breaks.every((b) => typeof b === 'string' && b.trim()))) fail('breaks: must be a list of HTML strings');
   if (ctx.LESSONS.filter((x) => x.id === l.id).length > 1) fail('duplicate id');
 
   (l.examples || []).forEach((ex, i) => {
@@ -222,6 +223,20 @@ for (const l of lessons) {
     if (!ex.test) tasks.push(async () => {
       const r = await rust(ex.starter);
       if (r.ok && normalize(r.stdout) === normalize(ex.expected)) fail('exercise: the starter code already prints the expected output');
+    });
+  }
+
+  // Translate it: the Python must print `expected`, the Rust solution too, and the starter must not.
+  const tr = l.translate;
+  if (tr) {
+    for (const f of ['py', 'starter', 'solution', 'expected']) if (!tr[f]) fail(`translate: missing "${f}"`);
+    tasks.push(async () => {
+      const [py, sol, start] = await Promise.all([python(tr.py), rust(tr.solution), rust(tr.starter)]);
+      if (!py.ok) fail(`translate: Python failed\n${py.stderr}`);
+      else if (normalize(py.stdout) !== normalize(tr.expected)) fail(`translate: Python printed\n${py.stdout}\nexpected\n${tr.expected}`);
+      if (!sol.ok) fail(`translate: solution failed\n${sol.stderr}`);
+      else if (normalize(sol.stdout) !== normalize(tr.expected)) fail(`translate: solution printed\n${sol.stdout}\nexpected\n${tr.expected}`);
+      if (start.ok && normalize(start.stdout) === normalize(tr.expected)) fail('translate: the starter already prints the expected output');
     });
   }
 

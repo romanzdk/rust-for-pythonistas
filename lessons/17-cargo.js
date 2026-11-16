@@ -380,6 +380,16 @@ LESSONS.push({
     expected: 'charged 250 cents',
     hint: 'Both the module <code>stripe</code> and the function <code>charge</code> need <code>pub</code>. <code>payments</code> itself is fine: <code>main</code> lives in the same file, so it can see it.',
   },
+  breaks: [
+    `Modules are not found by file name. <code>mod payments;</code> in the parent tells Cargo to read <code>payments.rs</code>. A
+      file nobody declares is ignored, not even compiled.`,
+    `Dependencies are built into your program. There's no <code>site-packages</code> at run time, so people who use your binary
+      don't install anything.`,
+    `<code>serde = "1.0"</code> means "any compatible 1.x", not exactly 1.0. Cargo reads a plain version as <code>^1.0</code>. In
+      <code>pyproject.toml</code> you'd write <code>"serde&gt;=1.0,&lt;2"</code> for the same thing.`,
+    `Dependencies are compiled from source. The first build of a project can take minutes; after that Cargo only rebuilds what
+      changed. <code>pip install</code> mostly downloads ready-made wheels.`,
+  ],
   cheat: [
     ['uv init shop', 'cargo new shop'],
     ['uv run shop', 'cargo run'],

@@ -621,6 +621,82 @@ LESSONS.push({
     `,
     hint: 'Inside the impl block, write the method exactly as the trait asks: fn describe(&amp;self) -> String { ... }. Return format!("I am {}", self.name).',
   },
+  breaks: [
+    `Duck typing is checked at compile time. A function that takes <code>&amp;impl Describe</code> only accepts types that say
+      <code>impl Describe for ...</code>. Having a method with the right name is not enough.`,
+    `Traits have methods, not fields. A default method can't read <code>self.name</code>; it can only call other methods of the
+      trait. The data lives in the struct.`,
+    `Dunder methods become traits, and you opt in to each one. <code>__str__</code> is <code>Display</code>, <code>__eq__</code> is
+      <code>PartialEq</code>, <code>__add__</code> is <code>Add</code>. Nothing is there until you implement or derive it.`,
+    `A list of mixed types needs a box. <code>[Circle(), Square()]</code> just works in Python. In Rust it is a
+      <code>Vec&lt;Box&lt;dyn Shape&gt;&gt;</code>, because a <code>Vec</code> holds one type.`,
+    `You can add your own trait to a type you didn't write, like <code>impl Describe for i32</code>. That's like adding a method
+      to Python's <code>int</code>, which Python doesn't allow.`,
+  ],
+  translate: {
+    py: code`
+      class Dog:
+          def speak(self) -> str:
+              return "Woof"
+
+
+      class Cat:
+          def speak(self) -> str:
+              return "Meow"
+
+
+      def chorus(animal, times: int) -> str:
+          return " ".join([animal.speak()] * times)
+
+
+      print(chorus(Dog(), 2))
+      print(chorus(Cat(), 3))
+    `,
+    starter: code`
+      trait Speak {
+          fn speak(&self) -> String;
+      }
+
+      fn main() {
+      }
+    `,
+    solution: code`
+      trait Speak {
+          fn speak(&self) -> String;
+      }
+
+      struct Dog;
+      struct Cat;
+
+      impl Speak for Dog {
+          fn speak(&self) -> String {
+              String::from("Woof")
+          }
+      }
+
+      impl Speak for Cat {
+          fn speak(&self) -> String {
+              String::from("Meow")
+          }
+      }
+
+      fn chorus(animal: &impl Speak, times: usize) -> String {
+          vec![animal.speak(); times].join(" ")
+      }
+
+      fn main() {
+          println!("{}", chorus(&Dog, 2));
+          println!("{}", chorus(&Cat, 3));
+      }
+    `,
+    expected: code`
+      Woof Woof
+      Meow Meow Meow
+    `,
+    hint: `Make <code>struct Dog;</code> and <code>struct Cat;</code>, and <code>impl Speak for</code> each. <code>chorus</code>
+      takes <code>&amp;impl Speak</code>. <code>vec![x; n]</code> is Python's <code>[x] * n</code>, and a <code>Vec</code> of
+      strings has <code>.join(" ")</code>.`,
+  },
   cheat: [
     ['class Dog:  # duck typing', 'impl Describe for Dog { fn describe(&self) -> String { ... } }'],
     ['class Describe(Protocol): ...', 'trait Describe { fn describe(&self) -> String; }'],

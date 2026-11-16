@@ -341,6 +341,46 @@ LESSONS.push({
     expected: 'red appears 3 times',
     hint: '<code>insert</code> throws the old value away. <code>entry(*w).or_insert(0)</code> hands you a reference to the value that is already there, or puts 0 there if this word is new. Put a <code>*</code> in front and use <code>+= 1</code>.',
   },
+  breaks: [
+    `A <code>Vec</code> holds one type. <code>[1, "a", 2.5]</code> has no direct Rust version. You use an enum (lesson 10) or a
+      trait object (lesson 14) instead.`,
+    `No negative indexes. <code>nums[-1]</code> doesn't compile, because indexes are <code>usize</code>. Use
+      <code>nums.last()</code> or <code>nums[nums.len() - 1]</code>.`,
+    `Out of range is a panic, not an exception you catch. <code>nums[10]</code> stops the program. When the index might be
+      wrong, use <code>nums.get(10)</code>, which gives an <code>Option</code> (lesson 11).`,
+    `<code>HashMap</code> order is random and changes between runs. Python dicts keep insertion order. Use
+      <code>BTreeMap</code> when you want sorted keys, or sort before printing.`,
+  ],
+  translate: {
+    py: code`
+      nums = [4, 8, 15, 16, 23, 42]
+      nums.append(50)
+      print(nums[1:3])
+      print(len(nums))
+      print("yes" if 23 in nums else "no")
+    `,
+    starter: code`
+      fn main() {
+      }
+    `,
+    solution: code`
+      fn main() {
+          let mut nums = vec![4, 8, 15, 16, 23, 42];
+          nums.push(50);
+          println!("{:?}", &nums[1..3]);
+          println!("{}", nums.len());
+          println!("{}", if nums.contains(&23) { "yes" } else { "no" });
+      }
+    `,
+    expected: code`
+      [8, 15]
+      7
+      yes
+    `,
+    hint: `Print a slice with <code>{:?}</code>. <code>x in nums</code> is <code>nums.contains(&amp;x)</code>, and
+      <code>a if c else b</code> is <code>if c { a } else { b }</code> (lesson 5). The <code>Vec</code> grows, so it needs
+      <code>mut</code>.`,
+  },
   cheat: [
     ['nums = [1, 2, 3]', 'let nums = vec![1, 2, 3];'],
     ['nums = []', 'let mut nums: Vec<i32> = Vec::new();'],
