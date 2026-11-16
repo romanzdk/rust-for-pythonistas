@@ -194,7 +194,9 @@ function exampleHTML(ex) {
           ${codeBlock(ex.rs, rsLang, 'rs', rsMarked)}</figure>
       </div>
       ${links.length ? '<div class="note" aria-live="polite"><p class="muted">Hover over or tap a <span class="marker">marked</span> line to see what it means.</p></div>' : ''}
-      ${ex.run ? runHTML(ex) : ex.out ? `<div class="output"><span>${ex.rsError ? 'Python prints' : ex.pyError ? 'Rust prints' : 'Both print'}</span><pre>${esc(ex.out)}</pre></div>` : ''}
+      ${ex.run ? runHTML(ex) : ex.pyOut
+        ? `<div class="pair outputs"><div class="output"><span>Python prints</span><pre>${esc(ex.pyOut)}</pre></div><div class="output"><span>Rust prints</span><pre>${esc(ex.out)}</pre></div></div>`
+        : ex.out ? `<div class="output"><span>${ex.rsError ? 'Python prints' : ex.pyError ? 'Rust prints' : 'Both print'}</span><pre>${esc(ex.out)}</pre></div>` : ''}
       ${ex.pyError ? `<div class="output bad"><span>Python crashes at run time with</span><pre>${esc(ex.pyError)}</pre></div>` : ''}
       ${ex.rsError ? `<div class="output bad"><span>Rust compiler says</span><pre>${esc(ex.rsError)}</pre></div>` : ''}
       ${fixHTML(ex)}

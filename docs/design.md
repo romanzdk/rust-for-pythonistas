@@ -74,3 +74,8 @@ language, then what real projects need.
 17. Cargo in depth (full `Cargo.toml`, dependencies, features, submodules, workspaces)
 18. Tests, builds and shipping (`#[test]`, `cargo test` output, doc tests, release builds, crates.io, PyO3 + maturin)
 19. Reading real code (modules, attributes, lifetimes, a realistic program)
+
+**Going deeper**
+20. Memory without a garbage collector (reference counting and `gc` vs owners and `Drop`, stack and heap, `Box`)
+21. Shared ownership (`Rc`, `RefCell`, `Weak`, reference cycles; examples may set `pyOut` where Python and Rust print
+    different things on purpose)

@@ -10,7 +10,7 @@ A free, interactive course: Python and Rust side by side, quizzes, and exercises
 
 [![check](https://github.com/romanzdk/rust-for-pythonistas/actions/workflows/check.yml/badge.svg)](https://github.com/romanzdk/rust-for-pythonistas/actions/workflows/check.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-![19 lessons](https://img.shields.io/badge/lessons-19-orange)
+![21 lessons](https://img.shields.io/badge/lessons-21-orange)
 ![Rust edition 2024](https://img.shields.io/badge/Rust-edition_2024-b7410e?logo=rust)
 ![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-3776ab?logo=python&logoColor=white)
 
@@ -79,6 +79,13 @@ Examples that fail on purpose show the real compiler error, and you can open the
 | 17 | [Cargo in depth: dependencies and workspaces](https://romanzdk.github.io/rust-for-pythonistas/#/cargo) | The full `Cargo.toml`, `Cargo.lock`, dependencies, features, submodules, workspaces |
 | 18 | [Tests, builds and shipping](https://romanzdk.github.io/rust-for-pythonistas/#/testing-shipping) | `#[test]`, reading `cargo test` output, release builds, crates.io, Rust inside Python wheels |
 | 19 | [Reading real code](https://romanzdk.github.io/rust-for-pythonistas/#/real-code) | Modules, attributes, lifetimes, and a realistic program to read line by line |
+
+**Going deeper**
+
+| # | Lesson | What you learn |
+|---|---|---|
+| 20 | [Memory without a garbage collector](https://romanzdk.github.io/rust-for-pythonistas/#/memory) | CPython's reference counting and `gc` vs owners and `Drop`, stack and heap, `Box` |
+| 21 | [Shared ownership: Rc, RefCell and Weak](https://romanzdk.github.io/rust-for-pythonistas/#/shared) | Python's shared objects in Rust, changing shared data, and why cycles leak without `Weak` |
 
 ## Every example is checked
 
