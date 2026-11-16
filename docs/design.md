@@ -79,3 +79,5 @@ language, then what real projects need.
 20. Memory without a garbage collector (reference counting and `gc` vs owners and `Drop`, stack and heap, `Box`)
 21. Shared ownership (`Rc`, `RefCell`, `Weak`, reference cycles; examples may set `pyOut` where Python and Rust print
     different things on purpose)
+22. Threads without a GIL (`thread::spawn`, `Arc<Mutex<T>>`, `Send`, `thread::scope`, channels). Thread examples
+    are written so their output never depends on timing: results are joined in order, counted under a lock, or sorted.

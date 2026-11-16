@@ -205,8 +205,8 @@ pre.code { margin: 0; padding: 10px 0; overflow-x: auto; background: var(--code-
 .q { margin: 0 0 6px; font-weight: 600; }
 .qn { color: var(--accent); }
 .options { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-.options button { text-align: left; }
-.options pre { margin: 0; font-size: 13px; }
+.options button { text-align: left; max-width: 100%; }
+.options pre { margin: 0; font-size: 13px; white-space: pre-wrap; }
 .options .right { border-color: var(--ok); background: var(--ok-soft); color: var(--ok); }
 .options .wrong { border-color: var(--bad); background: var(--bad-soft); color: var(--bad); }
 .options button:disabled:not(.right):not(.wrong) { opacity: 0.55; }
