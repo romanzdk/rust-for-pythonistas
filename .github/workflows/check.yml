@@ -1,5 +1,7 @@
 name: check
 on: [push, pull_request]
+permissions:
+  contents: read
 jobs:
   lessons:
     runs-on: ubuntu-latest
@@ -8,3 +10,27 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - run: rustup update stable && rustup default stable
       - run: node scripts/check.mjs
+
+  # Only checked content goes live: the site is built and deployed after the checks pass on main.
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: lessons
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - run: node scripts/build-pages.mjs _site
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

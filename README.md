@@ -10,7 +10,7 @@ A free, interactive course: Python and Rust side by side, quizzes, and exercises
 
 [![check](https://github.com/romanzdk/rust-for-pythonistas/actions/workflows/check.yml/badge.svg)](https://github.com/romanzdk/rust-for-pythonistas/actions/workflows/check.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-![22 lessons](https://img.shields.io/badge/lessons-22-orange)
+![26 lessons](https://img.shields.io/badge/lessons-26-orange)
 ![Rust edition 2024](https://img.shields.io/badge/Rust-edition_2024-b7410e?logo=rust)
 ![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-3776ab?logo=python&logoColor=white)
 
@@ -88,6 +88,21 @@ Examples that fail on purpose show the real compiler error, and you can open the
 | 21 | [Shared ownership: Rc, RefCell and Weak](https://romanzdk.github.io/rust-for-pythonistas/#/shared) | Python's shared objects in Rust, changing shared data, and why cycles leak without `Weak` |
 | 22 | [Threads without a GIL](https://romanzdk.github.io/rust-for-pythonistas/#/threads) | `thread::spawn`, `Arc<Mutex<T>>`, channels, scoped threads, and why data races don't compile |
 
+**Real-world Rust**
+
+| # | Lesson | What you learn |
+|---|---|---|
+| 23 | [The crates you'll meet everywhere](https://romanzdk.github.io/rust-for-pythonistas/#/crates) | serde instead of `json` and pydantic, anyhow and thiserror for errors, clap instead of argparse |
+| 24 | [async/await vs asyncio](https://romanzdk.github.io/rust-for-pythonistas/#/async) | `async fn`, `.await`, tokio, `join!` vs `gather`, tasks, timeouts |
+| 25 | [Rust inside Python with PyO3](https://romanzdk.github.io/rust-for-pythonistas/#/pyo3) | A Python module written in Rust: functions, type conversions, exceptions, classes, the GIL |
+| 26 | [Reading real projects](https://romanzdk.github.io/rust-for-pythonistas/#/tours) | Real code from uv, ruff and pydantic-core, read line by line next to Python |
+
+**Tools**
+
+- [📖 Phrasebook](https://romanzdk.github.io/rust-for-pythonistas/#/phrasebook): every Python → Rust cheat card row on one searchable page.
+- [🧭 Error index](https://romanzdk.github.io/rust-for-pythonistas/#/errors): the compiler errors you'll meet most, each with what Python would do, a program that causes it, and the fix.
+- [🔁 Review](https://romanzdk.github.io/rust-for-pythonistas/#/review): mixed questions from the lessons you've opened.
+
 ## Every example is checked
 
 A course is only useful if its examples are right, so CI checks **every** example on every push
@@ -98,6 +113,9 @@ A course is only useful if its examples are right, so CI checks **every** exampl
 - Examples that fail on purpose must fail with the exact error shown, and their fixed versions must run.
 - Every exercise solution must pass, and no starter code may pass before you change it.
 - Every "Translate it" Python program must print the expected output, and so must the Rust solution.
+- Programs that use crates (serde, anyhow, thiserror, clap, tokio) are built in a real Cargo project.
+- Quoted code from uv, ruff and pydantic-core must match the file on GitHub at the pinned commit, line for line.
+- Every error in the error index must fail with exactly that error, and its fix must run.
 - Command-line examples run with the arguments, files, stdin and environment variables the page shows, and must
   give the shown output, stderr and exit code.
 - `Cargo.toml`, terminal commands, `cargo test` output, the Dockerfile and the PyO3 example are checked by running the

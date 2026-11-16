@@ -10,13 +10,14 @@ import vm from 'node:vm';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-const scripts = [...html.matchAll(/<script src="((?:lib|lessons\/)[^"]*\.js)"/g)].map((m) => m[1]);
+const scripts = [...html.matchAll(/<script src="((?:lib|errors|lessons\/)[^"]*\.js)"/g)].map((m) => m[1]);
 const ctx = vm.createContext({});
 vm.runInContext('globalThis.window = globalThis;', ctx);
 for (const s of scripts) vm.runInContext(fs.readFileSync(path.join(root, s), 'utf8'), ctx, { filename: s });
 
 const only = process.argv.slice(2);
 const lessons = ctx.LESSONS.filter((l) => !only.length || only.includes(l.id));
+const checkErrors = !only.length || only.includes('errors');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'rfp-'));
 const normalize = (s) => s.split('\n').map((l) => l.trimEnd()).join('\n').trim();
 let jobId = 0;
@@ -32,7 +33,48 @@ function exec(cmd, args, input, opts = {}) {
   });
 }
 
+// Programs that use these crates are built in one shared Cargo project (the Playground has them too).
+const CRATES = /\b(serde|serde_json|anyhow|thiserror|clap|tokio)::|\buse (serde|serde_json|anyhow|thiserror|clap|tokio)\b/;
+const CARGO_TOML = `[package]
+name = "rfp"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+thiserror = "2"
+clap = { version = "4", features = ["derive"] }
+tokio = { version = "1", features = ["full"] }
+`;
+let cargoDir;
+let cargoQueue = Promise.resolve();
+// Cargo locks its build folder, so builds run one at a time.
+const serial = (fn) => {
+  const p = cargoQueue.then(fn);
+  cargoQueue = p.catch(() => {});
+  return p;
+};
+
+async function cargoRust(src, test, args, input, opts) {
+  if (!cargoDir) {
+    cargoDir = path.join(tmp, 'crates');
+    fs.mkdirSync(path.join(cargoDir, 'src', 'bin'), { recursive: true });
+    fs.writeFileSync(path.join(cargoDir, 'Cargo.toml'), CARGO_TOML);
+  }
+  const name = `p${jobId++}`;
+  fs.writeFileSync(path.join(cargoDir, 'src', 'bin', `${name}.rs`), src);
+  const env = { ...process.env, RUSTFLAGS: '-A warnings' };
+  const cargo = (sub, extra = []) => exec('cargo', [sub, '-q', '--bin', name, ...extra], '', { cwd: cargoDir, env, timeout: 900000 });
+  const c = await serial(() => cargo(test ? 'test' : 'build', test ? ['--no-run'] : []));
+  if (!c.ok) return { compiled: false, ok: false, stdout: '', stderr: c.stderr };
+  if (test) return { compiled: true, ...(await serial(() => cargo('test'))) };
+  return { compiled: true, ...(await exec(path.join(cargoDir, 'target', 'debug', name), args, input, opts)) };
+}
+
 async function rust(src, test = false, args = [], input = '', opts = {}) {
+  if (CRATES.test(src)) return cargoRust(src, test, args, input, opts);
   const id = jobId++;
   const file = path.join(tmp, `p${id}.rs`);
   const bin = path.join(tmp, `p${id}`);
@@ -90,6 +132,19 @@ async function pool(tasks, n = os.cpus().length) {
 }
 
 const lineCount = (s) => s.split('\n').length;
+
+// An excerpt shows real code from another project: it must match that file at the pinned commit, line for line.
+const sources = new Map();
+const dedent = (lines) => {
+  const indent = Math.min(...lines.filter((l) => l.trim()).map((l) => l.match(/^ */)[0].length));
+  return lines.map((l) => l.slice(indent).trimEnd()).join('\n').trim();
+};
+async function excerptMatches(x, shown) {
+  const url = `https://raw.githubusercontent.com/${x.repo}/${x.commit}/${x.path}`;
+  if (!sources.has(url)) sources.set(url, fetch(url).then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${r.status} ${url}`)))));
+  const lines = (await sources.get(url)).split('\n').slice(x.from - 1, x.to);
+  return dedent(lines) === normalize(shown) ? '' : `does not match ${url} lines ${x.from}-${x.to}:\n${dedent(lines)}`;
+}
 const errors = [];
 
 for (const l of lessons) {
@@ -107,6 +162,18 @@ for (const l of lessons) {
       if (!(rs >= 1 && rs <= lineCount(ex.rs))) fail(`${w}: link Rust line ${rs} is out of range`);
       for (const p of py == null ? [] : [].concat(py)) if (!(p >= 1 && p <= lineCount(ex.py))) fail(`${w}: link Python line ${p} is out of range`);
       if (!note) fail(`${w}: link on Rust line ${rs} has no note`);
+    }
+    if (ex.excerpt) {
+      const x = ex.excerpt;
+      if (!x.repo || !/^[0-9a-f]{40}$/.test(x.commit || '') || !x.path || !(x.from <= x.to)) return fail(`${w}: excerpt needs repo, a full commit SHA, path, from and to`);
+      tasks.push(async () => {
+        const problem = await excerptMatches(x, ex.rs).catch((e) => e.message);
+        if (problem) fail(`${w}: excerpt ${problem}`);
+        const py = ex.out === undefined ? await exec('python3', ['-I', '-c', 'import ast, sys; ast.parse(sys.stdin.read())'], ex.py) : await python(ex.py);
+        if (!py.ok) fail(`${w}: Python failed\n${py.stderr}`);
+        else if (ex.out !== undefined && normalize(py.stdout) !== normalize(ex.out)) fail(`${w}: Python printed\n${py.stdout}\nexpected\n${ex.out}`);
+      });
+      return;
     }
     if (ex.files) {
       if (ex.diagram) return; // a picture (like a folder tree), not code
@@ -250,10 +317,29 @@ for (const l of lessons) {
   console.log(`${mine ? '✗' : '✓'} ${l.id} (${tasks.length} programs)`);
 }
 
+// The error index: each snippet must fail with its error code and message, and each fix must print `out`.
+if (checkErrors) {
+  const tasks = [];
+  const ids = new Set(ctx.LESSONS.map((l) => l.id));
+  for (const e of ctx.ERRORS) {
+    const fail = (s) => errors.push(`[errors ${e.code}] ${s}`);
+    if (!ids.has(e.lesson)) fail(`unknown lesson "${e.lesson}"`);
+    tasks.push(async () => {
+      const [bad, good] = await Promise.all([rust(e.rs), rust(e.fix)]);
+      if (bad.compiled || !bad.stderr.includes(`error[${e.code}]: ${e.message}`)) fail(`snippet should fail with error[${e.code}]: ${e.message}\n${bad.stderr}`);
+      if (!good.ok) fail(`fix failed\n${good.stderr}`);
+      else if (normalize(good.stdout) !== normalize(e.out)) fail(`fix printed\n${good.stdout}\nexpected\n${e.out}`);
+    });
+  }
+  await pool(tasks);
+  const mine = errors.filter((e) => e.startsWith('[errors ')).length;
+  console.log(`${mine ? '✗' : '✓'} error index (${ctx.ERRORS.length} errors)`);
+}
+
 fs.rmSync(tmp, { recursive: true, force: true });
-if (only.length && lessons.length !== only.length) errors.push(`unknown lesson id in: ${only.join(', ')}`);
+if (only.length && lessons.length + checkErrors !== only.length) errors.push(`unknown lesson id in: ${only.join(', ')}`);
 if (errors.length) {
   console.error(`\n${errors.length} problem(s):\n\n${errors.join('\n\n')}`);
   process.exit(1);
 }
-console.log(`\nAll ${lessons.length} lessons OK.`);
+console.log(`\nAll ${lessons.length} lessons OK${checkErrors ? ", and the error index" : ""}.`);

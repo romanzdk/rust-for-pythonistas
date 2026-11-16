@@ -48,6 +48,12 @@ document.addEventListener('click', (e) => {
   if (b) setTheme(b.dataset.setTheme);
 });
 
+const SITE = 'https://romanzdk.github.io/rust-for-pythonistas/';
+const TOOLS = [
+  ['phrasebook', '📖 Phrasebook'],
+  ['errors', '🧭 Error index'],
+  ['review', '🔁 Review'],
+];
 const EXERCISE_IDS = new Set(LESSONS.flatMap((l) => [l.id, ...(l.translate ? [`${l.id}/translate`] : [])]));
 const solved = () => new Set(store.get('rfp-solved', []));
 function markSolved(id) {
@@ -113,7 +119,7 @@ function renderNav() {
   nav.innerHTML =
     `<a class="brand" href="#/">Rust <span>for</span> Pythonistas</a>` +
     `<p class="progress">${[...done].filter((id) => EXERCISE_IDS.has(id)).length} / ${EXERCISE_IDS.size} exercises solved</p>` +
-    `<a class="phrase-link" href="#/phrasebook"${current === 'phrasebook' ? ' aria-current="page"' : ''}>📖 Phrasebook</a>` +
+    TOOLS.map(([id, label]) => `<a class="phrase-link" href="#/${id}"${current.split('/')[0] === id ? ' aria-current="page"' : ''}>${label}</a>`).join('') +
     parts()
       .map(
         (p) =>
@@ -154,6 +160,9 @@ function renderHome() {
       <div><b>4 · Translate it</b><p>A short Python program. Write the Rust that prints the same thing.</p></div>
       <div><b>5 · Cheat card</b><p>Python on the left, Rust on the right. The <a href="#/phrasebook">phrasebook</a> puts every card in one searchable page.</p></div>
     </section>
+    <p class="muted tools-line">Also: <a href="#/phrasebook">📖 Phrasebook</a>, every Python → Rust row in one place ·
+      <a href="#/errors">🧭 Error index</a>, the compiler errors you'll meet, explained · <a href="#/review">🔁 Review</a>, mixed
+      questions from lessons you've opened.</p>
     <h2>Lessons</h2>
     ${parts()
       .map(
@@ -176,12 +185,21 @@ function renderHome() {
     };
 }
 
-function exampleHTML(ex) {
+const reportLink = (l, where) => {
+  const n = LESSONS.indexOf(l) + 1;
+  const body = `**Lesson:** ${n}. ${l.title} (${SITE}#/${l.id})\n\n**Where and what:** ${where}: \n\n**What it should say instead** (optional):\n`;
+  return `${REPO}/issues/new?title=${encodeURIComponent(`[${l.id}] `)}&body=${encodeURIComponent(body)}`;
+};
+
+function exampleHTML(ex, lesson) {
   const links = (ex.links || []).map(([rs, py, note]) => ({ rs, py: py == null ? [] : [].concat(py), note }));
   const rsMarked = new Set(links.map((l) => l.rs));
   const pyMarked = new Set(links.flatMap((l) => l.py));
   const rsLang = ex.rsLang || 'rust';
-  const play = rsLang === 'rust' && !ex.files && !ex.run ? `<a class="play" href="${playLink(ex.rs)}" target="_blank" rel="noopener">Open in Playground ↗</a>` : '';
+  const x = ex.excerpt;
+  const play = x
+    ? `<a class="play" href="https://github.com/${x.repo}/blob/${x.commit}/${x.path}#L${x.from}-L${x.to}" target="_blank" rel="noopener">View on GitHub ↗</a>`
+    : rsLang === 'rust' && !ex.files && !ex.run ? `<a class="play" href="${playLink(ex.rs)}" target="_blank" rel="noopener">Open in Playground ↗</a>` : '';
   return {
     links,
     html: `
@@ -200,6 +218,7 @@ function exampleHTML(ex) {
       ${ex.pyError ? `<div class="output bad"><span>Python crashes at run time with</span><pre>${esc(ex.pyError)}</pre></div>` : ''}
       ${ex.rsError ? `<div class="output bad"><span>Rust compiler says</span><pre>${esc(ex.rsError)}</pre></div>` : ''}
       ${fixHTML(ex)}
+      <p class="report"><a href="${reportLink(lesson, `example "${ex.title}"`)}" target="_blank" rel="noopener">Report a mistake in this example ↗</a></p>
     </section>`,
   };
 }
@@ -369,7 +388,9 @@ function wireExercise(box, ex, lesson, id) {
           <div><span>Expected</span><pre>${esc(normalize(ex.expected))}</pre></div></div>`;
       } else {
         result.className = 'result bad';
+        const known = [...new Set([...err.matchAll(/error\[(E\d{4})\]/g)].map((m) => m[1]))].filter((c) => ERRORS.some((e) => e.code === c));
         result.innerHTML = `<p><b>It didn't compile, or it crashed.</b> Read the first error from the top. It usually names the line and often suggests the fix.</p>
+          ${known.length ? `<p>In the error index: ${known.map((c) => `<a href="#/errors/${c}">${c}</a>`).join(', ')}</p>` : ''}
           ${out ? `<pre>${esc(out)}</pre>` : ''}<pre class="stderr">${esc(err)}</pre>`;
       }
     } catch (e) {
@@ -400,7 +421,8 @@ function nextLink(lesson) {
 function renderLesson(i) {
   const l = LESSONS[i];
   document.title = `${l.title} · Rust for Pythonistas`;
-  const examples = l.examples.map(exampleHTML);
+  const examples = l.examples.map((ex) => exampleHTML(ex, l));
+  store.set('rfp-seen', [...new Set([...store.get('rfp-seen', []), l.id])]);
   const prev = LESSONS[i - 1];
   const next = LESSONS[i + 1];
   main.innerHTML = `
@@ -428,6 +450,7 @@ ${l.translate ? `
       <h2><span class="step">${l.translate ? 5 : 4}</span> Cheat card</h2>
       ${cheatTable(l.cheat)}
 
+      <p class="report-lesson">Found a mistake, or something unclear? <a href="${reportLink(l, 'the lesson')}" target="_blank" rel="noopener">Tell me on GitHub ↗</a></p>
       <nav class="pager">
         ${prev ? `<a href="#/${prev.id}">← ${esc(prev.title)}</a>` : '<a href="#/">← All lessons</a>'}
         ${next ? `<a href="#/${next.id}">${esc(next.title)} →</a>` : '<a href="#/">All lessons →</a>'}
@@ -475,15 +498,100 @@ function renderPhrasebook() {
   input.focus();
 }
 
+function renderErrors() {
+  document.title = 'Error index · Rust for Pythonistas';
+  const lessonLink = (id) => {
+    const i = LESSONS.findIndex((l) => l.id === id);
+    return `<a href="#/${id}">lesson ${i + 1}: ${esc(LESSONS[i].title)}</a>`;
+  };
+  main.innerHTML = `
+    <article class="lesson">
+      <p class="eyebrow">Compiler errors, explained</p>
+      <h1>Error index</h1>
+      <p class="lead">The errors you'll meet most while making small changes. Each one shows what Python would do, what the
+      error means, a tiny program that causes it, and the fix. Search for the code (<code>E0382</code>) or a word from the
+      message.</p>
+      <p><input id="phrase-search" type="search" placeholder="Search errors…" aria-label="Search the error index" autocomplete="off"></p>
+      <p class="muted" id="phrase-count"></p>
+      ${ERRORS.map(
+        (e) => `<section class="err-card" id="err-${e.code}" data-text="${esc(`${e.code} ${e.message} ${e.python} ${e.why}`.toLowerCase())}">
+          <h3><code>error[${e.code}]</code> ${esc(e.message)}</h3>
+          <p><b>In Python:</b> ${e.python}</p>
+          <p><b>What it means:</b> ${e.why}</p>
+          <div class="pair">
+            <figure class="panel"><figcaption>Rust <span class="badge bad">does not compile</span></figcaption>${codeBlock(e.rs, 'rust')}</figure>
+            <figure class="panel"><figcaption>Fixed<a class="play" href="${playLink(e.fix)}" target="_blank" rel="noopener">Open in Playground ↗</a></figcaption>${codeBlock(e.fix, 'rust')}
+              <div class="output fix-out"><span>Prints</span><pre>${esc(e.out)}</pre></div></figure>
+          </div>
+          <p class="muted">Explained in ${lessonLink(e.lesson)} ·
+            <a href="https://doc.rust-lang.org/error_codes/${e.code}.html" target="_blank" rel="noopener">official explanation ↗</a></p>
+        </section>`,
+      ).join('')}
+    </article>`;
+  const input = document.getElementById('phrase-search');
+  const count = document.getElementById('phrase-count');
+  const filter = () => {
+    const words = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+    let shown = 0;
+    main.querySelectorAll('.err-card').forEach((c) => {
+      const hit = words.every((w) => c.dataset.text.includes(w));
+      c.hidden = !hit;
+      shown += hit;
+    });
+    count.textContent = `${shown} of ${ERRORS.length} errors`;
+  };
+  input.addEventListener('input', filter);
+  filter();
+}
+
+function renderReview() {
+  document.title = 'Review · Rust for Pythonistas';
+  const seen = new Set(store.get('rfp-seen', []));
+  const from = LESSONS.filter((l) => seen.has(l.id));
+  const pool = (from.length ? from : LESSONS.slice(0, 3)).flatMap((l) => l.quiz.map((q) => [q, l]));
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  const picked = pool.slice(0, 8);
+  main.innerHTML = `
+    <article class="lesson">
+      <p class="eyebrow">Practice</p>
+      <h1>Review</h1>
+      <p class="lead">${picked.length} questions, mixed from ${from.length ? `the ${from.length} lesson${from.length > 1 ? 's' : ''} you've opened` : 'the first lessons (open a few lessons and the questions will follow you)'}.
+      Answer by reading the code.</p>
+      ${picked.map(([q, l], k) => `<div class="review-item"><p class="muted from">From <a href="#/${l.id}">lesson ${LESSONS.indexOf(l) + 1}: ${esc(l.title)}</a></p>${quizHTML(q, k)}</div>`).join('')}
+      <p id="review-score" class="review-score" aria-live="polite"></p>
+      <p><button class="primary" id="review-again">New questions</button></p>
+    </article>`;
+  main.querySelectorAll('.quiz').forEach(wireQuiz);
+  const score = document.getElementById('review-score');
+  main.addEventListener('click', (e) => {
+    if (!e.target.closest('.options button')) return;
+    const done = [...main.querySelectorAll('.quiz')].filter((q) => !q.querySelector('.explain').hidden);
+    const right = done.filter((q) => !q.querySelector('.wrong')).length;
+    score.textContent = done.length === picked.length ? `You got ${right} of ${picked.length} right.` : `${right} of ${done.length} right so far.`;
+  });
+  document.getElementById('review-again').onclick = () => {
+    renderReview();
+    window.scrollTo(0, 0);
+  };
+}
+
 function route() {
-  const id = location.hash.replace(/^#\/?/, '');
+  const id = location.hash.replace(/^#\/?/, '') || document.body.dataset.page || '';
+  const [page, sub] = id.split('/');
   const i = LESSONS.findIndex((l) => l.id === id);
   if (id === 'phrasebook') renderPhrasebook();
+  else if (page === 'errors') renderErrors(sub);
+  else if (id === 'review') renderReview();
   else if (i < 0) renderHome();
   else renderLesson(i);
   renderNav();
   document.body.classList.remove('nav-open');
-  window.scrollTo(0, 0);
+  const target = sub && document.getElementById(`err-${sub}`);
+  if (target) target.scrollIntoView();
+  else window.scrollTo(0, 0);
 }
 
 document.querySelector('.topbar .theme-slot').innerHTML = themeSwitch();
