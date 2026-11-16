@@ -305,3 +305,10 @@ h3.part { margin: 28px 0 0; color: var(--accent); font-size: 0.85rem; text-trans
   .phrases td:nth-child(1)::before { content: "Python"; color: var(--py); }
   .phrases td:nth-child(2)::before { content: "Rust"; color: var(--accent); }
 }
+
+/* Phones: iOS Safari enlarges text inside wide, sideways-scrolling blocks unless told not to. */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+@media (max-width: 600px) {
+  code, pre, .CodeMirror, .editor-wrap textarea, .options pre, .output.bad pre { font-size: 12.5px; }
+  .num { width: 2.2em; padding-right: 0.7em; }
+}
