@@ -1,0 +1,9 @@
+name: check
+on: [push, pull_request]
+jobs:
+  lessons:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup update stable && rustup default stable
+      - run: node scripts/check.mjs
