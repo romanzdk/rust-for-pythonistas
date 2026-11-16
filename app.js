@@ -121,6 +121,8 @@ function exampleHTML(ex) {
   const links = (ex.links || []).map(([rs, py, note]) => ({ rs, py: py == null ? [] : [].concat(py), note }));
   const rsMarked = new Set(links.map((l) => l.rs));
   const pyMarked = new Set(links.flatMap((l) => l.py));
+  const rsLang = ex.rsLang || 'rust';
+  const play = rsLang === 'rust' && !ex.files ? `<a class="play" href="${playLink(ex.rs)}" target="_blank" rel="noopener">Open in Playground ↗</a>` : '';
   return {
     links,
     html: `
@@ -128,10 +130,9 @@ function exampleHTML(ex) {
       <h3>${esc(ex.title)}</h3>
       ${ex.text ? `<div class="prose">${ex.text}</div>` : ''}
       <div class="pair">
-        <figure class="panel"><figcaption>Python</figcaption>${codeBlock(ex.py, 'python', 'py', pyMarked)}</figure>
-        <figure class="panel"><figcaption>Rust ${ex.rsError ? '<span class="badge bad">does not compile</span>' : ''}
-          <a class="play" href="${playLink(ex.rs)}" target="_blank" rel="noopener">Open in Playground ↗</a></figcaption>
-          ${codeBlock(ex.rs, 'rust', 'rs', rsMarked)}</figure>
+        <figure class="panel"><figcaption>${esc(ex.pyLabel || 'Python')}</figcaption>${codeBlock(ex.py, ex.pyLang || 'python', 'py', pyMarked)}</figure>
+        <figure class="panel"><figcaption>${esc(ex.rsLabel || 'Rust')} ${ex.rsError ? '<span class="badge bad">does not compile</span>' : ''}${play}</figcaption>
+          ${codeBlock(ex.rs, rsLang, 'rs', rsMarked)}</figure>
       </div>
       ${links.length ? '<div class="note" aria-live="polite"><p class="muted">Hover over or tap a <span class="marker">marked</span> line to see what it means.</p></div>' : ''}
       ${ex.out ? `<div class="output"><span>${ex.rsError ? 'Python prints' : ex.pyError ? 'Rust prints' : 'Both print'}</span><pre>${esc(ex.out)}</pre></div>` : ''}
@@ -190,11 +191,11 @@ function wireQuiz(el) {
   });
 }
 
-async function runRust(src) {
+async function runRust(src, test = false) {
   const res = await fetch(`${PLAYGROUND}/execute`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ channel: 'stable', mode: 'debug', edition: '2024', crateType: 'bin', tests: false, backtrace: false, code: src }),
+    body: JSON.stringify({ channel: 'stable', mode: 'debug', edition: '2024', crateType: test ? 'lib' : 'bin', tests: test, backtrace: false, code: src }),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
@@ -232,14 +233,21 @@ function wireExercise(lesson) {
     result.innerHTML = '<p class="muted">Compiling on the Rust Playground… (usually a few seconds)</p>';
     const src = ed.getValue();
     try {
-      const r = await runRust(src);
+      const r = await runRust(src, !!ex.test);
       const out = normalize(r.stdout);
       const err = cleanStderr(r.stderr);
-      if (r.success && out === normalize(ex.expected)) {
+      if (ex.test && r.success) {
+        result.className = 'result ok';
+        result.innerHTML = `<p><b>✅ Solved!</b> All tests pass. ${nextLink(lesson)}</p><pre>${esc(out)}</pre>`;
+        markSolved(lesson.id);
+      } else if (ex.test && out.includes('test result: FAILED')) {
+        result.className = 'result warn';
+        result.innerHTML = `<p><b>It compiles, but a test fails.</b> Read the <code>left</code> / <code>right</code> lines: they show what the code gave and what the test expected.</p><pre>${esc(out)}</pre>`;
+      } else if (!ex.test && r.success && out === normalize(ex.expected)) {
         result.className = 'result ok';
         result.innerHTML = `<p><b>✅ Solved!</b> The output matches. ${nextLink(lesson)}</p><pre>${esc(out)}</pre>`;
         markSolved(lesson.id);
-      } else if (r.success) {
+      } else if (!ex.test && r.success) {
         result.className = 'result warn';
         result.innerHTML = `<p><b>It compiles and runs, but the output is different.</b></p>
           <div class="cmp"><div><span>Your output</span><pre>${esc(out) || '(nothing)'}</pre></div>
@@ -296,7 +304,9 @@ function renderLesson(i) {
       <h2><span class="step">3</span> Change it</h2>
       <div class="exercise">
         <div class="prose">${l.exercise.task}</div>
-        <div class="output"><span>Expected output</span><pre>${esc(l.exercise.expected)}</pre></div>
+        ${l.exercise.test
+          ? '<p class="muted">This code has no <code>main</code>. <b>Run</b> runs its tests (<code>cargo test</code>). The goal is for all of them to pass.</p>'
+          : `<div class="output"><span>Expected output</span><pre>${esc(l.exercise.expected)}</pre></div>`}
         <div class="editor-wrap"><textarea id="editor" spellcheck="false" aria-label="Rust code editor"></textarea></div>
         <div class="actions">
           <button class="primary" id="run" title="Ctrl/Cmd + Enter">▶ Run</button>

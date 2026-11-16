@@ -51,15 +51,21 @@ LESSONS.push({
     rs: code`...`,                   // full Rust program with fn main
     out: code`...`,                  // what both print (checked)
     links: [[rsLine, pyLine | [pyLines] | null, 'note HTML']],  // 1-based line numbers
-    rsError: 'error[E0382]: ...',    // optional: Rust must fail to compile with this text
+    rsError: 'error[E0382]: ...',    // optional: Rust must fail to compile; may be the full rustc output
+                                     // (its error/help lines are checked)
     pyError: 'TypeError: ...',       // optional: Python must crash with this text
+    // For files or commands instead of programs: not run, just shown.
+    // files: true, pyLabel: 'pyproject.toml', pyLang: 'ini', rsLabel: 'Cargo.toml', rsLang: 'ini'
+    // test: true  → rs is a test module (no main) that must pass `cargo test`; py just has to run
   }],
   quiz: [
     { type: 'output', q: 'What does this print?', code: code`...`, options: ['a', 'b'], answer: 0, explain: '...' },
-    { type: 'compiles', q: 'Does this compile?', code: code`...`, answer: false, explain: '...' },
+    { type: 'compiles', q: 'Does this compile?', code: code`...`, answer: false, explain: '...' },  // test: true → compiled as `cargo test`
     { type: 'choice', q: '...', code: code`...` /* optional */, options: ['...'], answer: 1, explain: '...' },
   ],
   exercise: { task: `<p>HTML</p>`, starter: code`...`, solution: code`...`, expected: code`...`, hint: '...' },
+  // or a test exercise: no main, no expected; it passes when `cargo test` passes
+  // exercise: { test: true, task, starter, solution, hint },
   cheat: [['python', 'rust'], ...],
 });
 ```
