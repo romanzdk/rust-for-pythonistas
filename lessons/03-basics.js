@@ -1,5 +1,6 @@
 LESSONS.push({
   id: 'basics',
+  part: 'The language',
   title: 'Hello, variables and mut',
   summary: 'fn main, println!, let, mut, shadowing, and why there are semicolons.',
   intro: `
@@ -67,7 +68,7 @@ LESSONS.push({
     {
       title: 'Forgetting mut is a compile error',
       text: `<p>Python is fine with this. Rust refuses to build it, and the error message is clear. Learning to read
-      these messages is a big part of reading Rust, and lesson 13 covers it.</p>`,
+      these messages is a big part of reading Rust, and lesson 15 covers it.</p>`,
       py: code`
         total = 10
         total = total + 5
@@ -114,7 +115,7 @@ LESSONS.push({
       out: '43',
       links: [
         [2, 1, '<code>text</code> is a string here.'],
-        [3, 2, 'A new <code>text</code>, this time an <code>i32</code>. <code>: i32</code> is a type annotation, like a Python type hint, except the compiler enforces it. <code>.parse()</code> plays the role of <code>int()</code>. <code>.unwrap()</code> means "I am sure this worked, crash if not". Lesson 10 explains it.'],
+        [3, 2, 'A new <code>text</code>, this time an <code>i32</code>. <code>: i32</code> is a type annotation, like a Python type hint, except the compiler enforces it. <code>.parse()</code> plays the role of <code>int()</code>. <code>.unwrap()</code> means "I am sure this worked, crash if not". Lesson 12 explains it.'],
         [4, 3, 'A placeholder can hold a name like <code>{text}</code>, but not an expression like <code>{text + 1}</code>. For expressions, use an empty <code>{}</code> and pass the value after the comma.'],
       ],
     },

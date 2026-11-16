@@ -54,7 +54,7 @@ LESSONS.push({
         x
       `,
       links: [
-        [1, null, '<code>fn main()</code> is where the program starts, as in lesson 1.'],
+        [1, null, '<code>fn main()</code> is where the program starts, as in lesson 3.'],
         [2, 1, '<code>i32</code> is a whole number in 32 bits. Without a type, Rust would still pick <code>i32</code> for a whole number.'],
         [3, 2, '<code>i64</code> is twice as wide, so it can hold this number. Python needed no decision here; in Rust the type is part of the value.'],
         [4, 3, '<code>f64</code> is the float type, and it plays the role of Python <code>float</code>.'],
@@ -139,7 +139,7 @@ LESSONS.push({
       title: '&str is borrowed, String is owned',
       text: `<p>A literal like <code>"Ferris"</code> has type <code>&amp;str</code>: a <b>borrowed</b> view of text that
       is already stored inside the program. For now, read <code>&amp;</code> as "borrowed: look at it, don't take it".
-      Lesson 11 explains what the compiler does with that.</p>
+      Lesson 13 explains what the compiler does with that.</p>
       <p>You cannot grow a <code>&amp;str</code>. When you need to build or change text, use <code>String</code>: owned
       text that can grow. <code>String::from("hi")</code>, <code>"hi".to_string()</code> and
       <code>format!("Hi {name}")</code> all make one. <code>push_str</code> adds text and <code>push</code> adds a
@@ -181,7 +181,7 @@ LESSONS.push({
       <p>To count characters in Rust, ask for the characters and count them: <code>.chars().count()</code>. That is the
       Python <code>len()</code>. Other string methods have direct Python matches: <code>.to_uppercase()</code> is
       <code>.upper()</code>, <code>.trim()</code> is <code>.strip()</code>, <code>.contains(x)</code> is
-      <code>x in s</code>, and <code>.split(x)</code> is <code>s.split(x)</code> but gives an iterator, which lesson 6
+      <code>x in s</code>, and <code>.split(x)</code> is <code>s.split(x)</code> but gives an iterator, which lesson 8
       covers.</p>`,
       py: code`
         word = "  héllo  ".strip()

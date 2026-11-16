@@ -116,7 +116,7 @@ LESSONS.push({
       title: 'A story in labels: use after move',
       text: `<p>Some errors point at several lines. Read the labels in line order and they tell a story: <i>"names has a type
       that is not Copy" → "value moved here" → "value borrowed here after move"</i>. The <code>help:</code> shows the
-      fix with <code>++++++++</code> under the added characters. (Lesson 11 covers moves.)</p>`,
+      fix with <code>++++++++</code> under the added characters. (Lesson 13 covers moves.)</p>`,
       py: code`
         names = ["Ann", "Bob"]
         backup = names
@@ -171,7 +171,7 @@ LESSONS.push({
     },
     {
       title: 'The help: line is often the whole fix',
-      text: `<p>Python lists can always be changed. In Rust you must say <code>mut</code> (lesson 1). The <code>+++</code> under
+      text: `<p>Python lists can always be changed. In Rust you must say <code>mut</code> (lesson 3). The <code>+++</code> under
       <code>mut</code> means "add exactly these characters here". Many everyday errors are fixed by doing what
       <code>help:</code> says.</p>`,
       py: code`
@@ -319,7 +319,7 @@ LESSONS.push({
       ],
       answer: 0,
       rsError: 'error[E0384]',
-      explain: '<code>total</code> is not <code>mut</code> (lesson 1). The help line will suggest <code>let mut total = 0;</code>.',
+      explain: '<code>total</code> is not <code>mut</code> (lesson 3). The help line will suggest <code>let mut total = 0;</code>.',
     },
   ],
   exercise: {

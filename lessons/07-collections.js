@@ -9,7 +9,7 @@ LESSONS.push({
     <p>One difference that bites people: a <code>HashMap</code> has no order. Python dicts keep insertion order; a
     Rust <code>HashMap</code> does not, and the order can change from run to run. So never print a table by looping over
     a <code>HashMap</code>. Sort the keys first, or use a <code>BTreeMap</code>, which keeps its keys sorted.</p>
-    <p>You will see <code>&amp;</code> a lot here. Read it as "borrowed: look at it, do not take it." Lesson 11 explains
+    <p>You will see <code>&amp;</code> a lot here. Read it as "borrowed: look at it, do not take it." Lesson 13 explains
     the rule behind it; for now, seeing <code>&amp;</code> means the data stays where it is.</p>`,
   examples: [
     {
@@ -106,7 +106,7 @@ LESSONS.push({
       <p>Indexing a Vec past its end is not a catchable exception. It <b>panics</b> and the program stops right there.
       Python raises <code>IndexError</code> and you can catch it. If an index might be too big, Rust has
       <code>temps.get(9)</code>, which gives <code>Some(value)</code> or <code>None</code> instead of crashing.
-      <code>Option</code> is lesson 9.</p>`,
+      <code>Option</code> is lesson 11.</p>`,
       py: code`
         temps = [12, 15, 9, 21]
         print(temps[1:3])

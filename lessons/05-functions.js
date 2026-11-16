@@ -134,7 +134,7 @@ LESSONS.push({
       found <code>i32</code>".</p>
       <p>Rust also has no default argument values and no keyword arguments. A Rust function takes every value, in
       order. When Python code would use defaults, Rust code usually writes a second function with a shorter name, or
-      groups the options in a struct (lesson 7).</p>`,
+      groups the options in a struct (lesson 9).</p>`,
       py: code`
         def greet(name: str, loud: bool) -> None:
             if loud:
@@ -326,7 +326,7 @@ LESSONS.push({
     ['value = 1 + 2', 'let value = { 1 + 2 };   // a block is an expression'],
     ['f(1)   # call', 'f(1);'],
     ['def main(): ...', 'fn main() { ... }'],
-    ['lambda x: x * 2', '|x| x * 2   // closure, lesson 6'],
+    ['lambda x: x * 2', '|x| x * 2   // closure, lesson 8'],
     ['print(f(1))', 'println!("{}", f(1));'],
   ],
 });

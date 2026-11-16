@@ -39,7 +39,7 @@ LESSONS.push({
       `,
       out: 'B',
       links: [
-        [1, null, '<code>fn main()</code> is where the program starts, as in lesson 1.'],
+        [1, null, '<code>fn main()</code> is where the program starts, as in lesson 3.'],
         [2, 1, '<code>let</code> makes the variable. Without <code>mut</code> it never changes.'],
         [3, 2, 'The condition sits in no parentheses, and it ends with <code>{</code>, not with a colon. The braces take the place of Python indentation.'],
         [4, 3, 'The body of the branch. Statements inside it end with <code>;</code>.'],

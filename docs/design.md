@@ -32,27 +32,39 @@ This course starts from Python and aims at reading.
 - Progress (solved exercises) and editor drafts are kept in `localStorage`. The site works without them.
 - Every example is run. Plain examples: Python and Rust must print `out`. Examples that fail on purpose
   (`rsError`/`pyError`) must fail with that exact error and must have a fixed version (`rsFix`/`pyFix`) that runs.
-  Test examples run under pytest and `rustc --test`. File/command examples (`files: true`) carry a hidden `check`
-  script that runs the real tools (cargo, uv, pytest, maturin) on the shown files and commands. Only folder-tree
+  Test examples run under pytest and `rustc --test`. Command-line examples (`run`) get the same arguments, files,
+  stdin and environment on both sides and must match the shown output, stderr and exit code. File/command examples (`files: true`) carry a hidden `check`
+  script that runs the real tools (cargo, uv, pytest, docker, maturin) on the shown files and commands. Only folder-tree
   pictures (`diagram: true`) are not run.
 - `scripts/check.mjs` loads the same files as `index.html` and runs every Python/Rust snippet locally with `python3` and
   `rustc --edition 2024`. GitHub Actions runs it on each push. GitHub Pages serves `main` as-is.
 
 ## Curriculum
 
-1. Hello, variables and mut
-2. Numbers and strings (`i32`/`f64`/`usize`, `as`, `String` vs `&str`)
-3. Functions and expressions (type hints → types, last expression is the return value)
-4. if, loops and ranges
-5. Vec and HashMap (list / dict)
-6. Iterators and closures (list comprehensions → `map`/`filter`/`collect`)
-7. Structs and impl (classes)
-8. Enums and match
-9. Option instead of None
-10. Result and `?` instead of exceptions
-11. Ownership and borrowing
-12. Traits (duck typing / Protocols)
-13. Reading compiler errors
-14. Reading real code (modules, `use`, attributes, recognizing lifetimes, a realistic program)
-15. Cargo projects and Cargo.toml (layout, dependencies, features, modules as files, workspaces)
-16. Tests, builds and shipping (`#[test]`, `cargo test` output, doc tests, release builds, crates.io, PyO3 + maturin)
+The order follows how a Python developer starts a real project: first the project and a tiny program, then the
+language, then what real projects need.
+
+**Get started**
+1. Your first Rust project (`cargo new` vs `uv init`, the files, `Cargo.toml`, `cargo run/check/build`)
+2. A tiny app: a function and a module (`fn`, `mod`, `pub`, `use`, inline modules)
+
+**The language**
+3. Hello, variables and mut
+4. Numbers and strings (`i32`/`f64`/`usize`, `as`, `String` vs `&str`)
+5. Functions and expressions (type hints → types, last expression is the return value)
+6. if, loops and ranges
+7. Vec and HashMap (list / dict)
+8. Iterators and closures (list comprehensions → `map`/`filter`/`collect`)
+9. Structs and impl (classes)
+10. Enums and match
+11. Option instead of None
+12. Result and `?` instead of exceptions
+13. Ownership and borrowing
+14. Traits (duck typing / Protocols)
+15. Reading compiler errors
+
+**Real projects**
+16. Building and running a real program (arguments, files, stdin, env vars, exit codes, Docker)
+17. Cargo in depth (full `Cargo.toml`, dependencies, features, submodules, workspaces)
+18. Tests, builds and shipping (`#[test]`, `cargo test` output, doc tests, release builds, crates.io, PyO3 + maturin)
+19. Reading real code (modules, attributes, lifetimes, a realistic program)

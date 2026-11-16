@@ -19,7 +19,7 @@ example or question. If you have it, include what you expected instead.
    node scripts/check.mjs               # everything, as CI does
    ```
 
-   You need `rustc` and `cargo` (stable, edition 2024), `python3` (3.12+), `uv`, `node` and network access.
+   You need `rustc` and `cargo` (stable, edition 2024), `python3` (3.12+), `uv`, `docker`, `node` and network access.
 
 ### Writing style
 
@@ -36,6 +36,7 @@ example or question. If you have it, include what you expected instead.
 ```js
 LESSONS.push({
   id: 'option',                      // URL: #/option
+  part: 'The language',              // optional: starts a new group in the menu and on the home page
   title: 'Option instead of None',
   summary: 'One line for the home page.',
   intro: `<p>HTML</p>`,
@@ -55,6 +56,8 @@ LESSONS.push({
     fixOut: code`...`,               // what the fixes print, if different from out
     fixNote: 'HTML',                 // a sentence shown above the fixes
     test: true,                      // both sides are test files: pytest and `cargo test` must pass
+    run: { args: ['notes.txt'], files: { 'notes.txt': '...' }, stdin: 'notes.txt', env: { NAME: 'x' },
+           exitCode: 1, stderr: 'error: ...' },  // a command-line program; py is saved as main.py
 
     // Files or commands instead of a program (Cargo.toml, terminal output, several files):
     files: true, pyLabel: 'pyproject.toml', pyLang: 'ini', rsLabel: 'Cargo.toml', rsLang: 'ini',

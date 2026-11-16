@@ -24,7 +24,7 @@ let jobId = 0;
 function exec(cmd, args, input, opts = {}) {
   return new Promise((resolve) => {
     const child = execFile(cmd, args, { timeout: 20000, maxBuffer: 1 << 24, ...opts }, (err, stdout, stderr) =>
-      resolve({ ok: !err, stdout, stderr }),
+      resolve({ ok: !err, code: err ? (typeof err.code === 'number' ? err.code : -1) : 0, stdout, stderr }),
     );
     // A program that exits without reading stdin closes the pipe first; that EPIPE is harmless.
     child.stdin.on('error', () => {});
@@ -32,14 +32,29 @@ function exec(cmd, args, input, opts = {}) {
   });
 }
 
-async function rust(src, test = false) {
+async function rust(src, test = false, args = [], input = '', opts = {}) {
   const id = jobId++;
   const file = path.join(tmp, `p${id}.rs`);
   const bin = path.join(tmp, `p${id}`);
   fs.writeFileSync(file, src);
   const c = await exec('rustc', ['--edition', '2024', '-A', 'warnings', ...(test ? ['--test'] : []), '-o', bin, file]);
   if (!c.ok) return { compiled: false, ok: false, stdout: '', stderr: c.stderr };
-  return { compiled: true, ...(await exec(bin, [], '')) };
+  return { compiled: true, ...(await exec(bin, args, input, opts)) };
+}
+
+// An example with `run` is a command-line program: both sides get the same arguments, files, stdin and environment.
+async function runBoth(ex) {
+  const r = ex.run;
+  const dir = fs.mkdtempSync(path.join(tmp, 'run-'));
+  for (const [name, content] of Object.entries(r.files || {})) fs.writeFileSync(path.join(dir, name), content);
+  fs.writeFileSync(path.join(dir, 'main.py'), ex.py);
+  const opts = { cwd: dir, env: { ...process.env, ...(r.env || {}) } };
+  const input = r.stdin ? r.files[r.stdin] : '';
+  const [py, rs] = await Promise.all([
+    exec('python3', ['-I', path.join(dir, 'main.py'), ...(r.args || [])], input, opts),
+    rust(ex.rs, false, r.args || [], input, opts),
+  ]);
+  return { py, rs };
 }
 
 const python = (src) => exec('python3', ['-I', '-'], src);
@@ -107,6 +122,18 @@ for (const l of lessons) {
         const [p, r] = await Promise.all([pytest(ex.py), rust(ex.rs, true)]);
         if (!p.ok) fail(`${w}: pytest fails\n${p.stdout}${p.stderr}`);
         if (!r.ok) fail(`${w}: Rust tests fail\n${r.stdout}${r.stderr}`);
+      });
+      return;
+    }
+    if (ex.run) {
+      tasks.push(async () => {
+        const { py, rs } = await runBoth(ex);
+        for (const [side, r] of [['Python', py], ['Rust', rs]]) {
+          if (side === 'Rust' && !r.compiled) { fail(`${w}: Rust does not compile\n${r.stderr}`); continue; }
+          if (r.code !== (ex.run.exitCode ?? 0)) fail(`${w}: ${side} exit code ${r.code}, expected ${ex.run.exitCode ?? 0}\n${r.stderr}`);
+          if (normalize(r.stdout) !== normalize(ex.out ?? '')) fail(`${w}: ${side} printed\n${r.stdout}\nexpected\n${ex.out ?? ''}`);
+          if (ex.run.stderr ? !r.stderr.includes(ex.run.stderr) : r.stderr.trim()) fail(`${w}: ${side} stderr was\n${r.stderr}\nexpected it to contain\n${ex.run.stderr ?? '(nothing)'}`);
+        }
       });
       return;
     }

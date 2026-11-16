@@ -1,50 +1,15 @@
 LESSONS.push({
   id: 'cargo',
-  title: 'Cargo projects and Cargo.toml',
-  summary: 'Project layout, Cargo.toml vs pyproject.toml, Cargo.lock, dependencies, modules as files, and workspaces.',
+  title: 'Cargo in depth: dependencies and workspaces',
+  summary: 'A bigger project layout, the full Cargo.toml, Cargo.lock, adding dependencies, features, submodules and workspaces.',
   intro: `
-    <p>In Python you combine several tools: <code>uv</code> or <code>pip</code> for packages, <code>pytest</code> for
-    tests, <code>ruff</code> for formatting and linting, <code>mypy</code> for types, and a build backend for wheels. Rust
-    ships with <b>one</b> tool that does all of this: <b>Cargo</b>. When you open a Rust repository, almost everything
-    you need to know is in two places: <code>Cargo.toml</code> and the <code>src/</code> folder.</p>
-    <p>A few words first. A <b>crate</b> is one Rust package, the unit Cargo builds and publishes, like a
-    Python distribution package. A crate is either a <b>binary</b> (a program, it has <code>src/main.rs</code>) or a
-    <b>library</b> (code for other crates, it has <code>src/lib.rs</code>), or both. Crates are published on
-    <b>crates.io</b> (Rust's PyPI), and their documentation is built automatically on <b>docs.rs</b>.</p>`,
+    <p>Lesson 1 made a tiny crate with one file. Real projects have more: dependencies from <b>crates.io</b> (Rust's PyPI,
+    with documentation built automatically on <b>docs.rs</b>), several modules, a library next to the program, and
+    sometimes many crates in one repository. When you open a Rust repository, almost everything you need to know is in
+    two places: <code>Cargo.toml</code> and the <code>src/</code> folder.</p>
+    <p>A crate is either a <b>binary</b> (a program, it has <code>src/main.rs</code>) or a <b>library</b> (code for other
+    crates, it has <code>src/lib.rs</code>), or both.</p>`,
   examples: [
-    {
-      title: 'Starting and running a project',
-      check: code`
-        mkdir rs py
-        (cd rs && source "$RS")
-        (cd py && source "$PY")
-      `,
-      text: `<p><code>cargo new</code> creates a ready-to-run project: <code>Cargo.toml</code>, a hello-world
-      <code>src/main.rs</code>, a <code>.gitignore</code> and a git repository. There is no virtual environment to create
-      or activate. Dependencies are downloaded and compiled into the project's <code>target/</code> folder.</p>`,
-      files: true,
-      pyLabel: 'Terminal · Python',
-      pyLang: 'bash',
-      rsLabel: 'Terminal · Rust',
-      rsLang: 'bash',
-      py: code`
-        uv init shop
-        cd shop
-        uv run shop
-        uvx mypy .
-      `,
-      rs: code`
-        cargo new shop
-        cd shop
-        cargo run
-        cargo check
-      `,
-      links: [
-        [1, 1, '<code>cargo new shop</code> makes a binary crate. <code>cargo new --lib shop</code> makes a library crate (<code>src/lib.rs</code> instead of <code>src/main.rs</code>).'],
-        [3, 3, '<code>cargo run</code> compiles (only what changed) and then runs <code>src/main.rs</code>. The first run also downloads and compiles all dependencies, so it is slow. Later runs are fast.'],
-        [4, 4, '<code>cargo check</code> type-checks everything without producing a program. It is the fastest way to see compiler errors, so editors run it all the time. Think of it as <code>mypy</code> that can never be skipped.'],
-      ],
-    },
     {
       title: 'Where things live',
       diagram: true,
@@ -93,7 +58,7 @@ LESSONS.push({
         [7, 7, 'One file is one module, <code>models</code>, like <code>models.py</code>.'],
         [8, [8, 9], '<code>payments.rs</code> is the <code>payments</code> module itself, like <code>payments/__init__.py</code>. Older code puts it in <code>payments/mod.rs</code> instead.'],
         [10, 10, 'A submodule, <code>payments::stripe</code>.'],
-        [12, 12, 'Integration tests. Each file here is compiled as a separate crate that uses your library from the outside (lesson 16).'],
+        [12, 12, 'Integration tests. Each file here is compiled as a separate crate that uses your library from the outside (lesson 18).'],
         [13, 13, 'All build output: debug and release builds, compiled dependencies, test binaries. Git-ignored. It takes the place of <code>.venv</code>, <code>__pycache__</code> and <code>dist/</code> together.'],
       ],
     },
@@ -178,7 +143,7 @@ LESSONS.push({
       text: `<p>In Python, every <code>.py</code> file inside a package can be imported. In Rust, a file only becomes part of
       the crate when its parent <b>declares</b> it with <code>mod name;</code>. So when you read a crate, start at
       <code>main.rs</code> or <code>lib.rs</code> and follow the <code>mod</code> lines. They are the table of contents.
-      Everything is private unless marked <code>pub</code> (lesson 14).</p>`,
+      Everything is private unless marked <code>pub</code> (lesson 2).</p>`,
       files: true,
       pyLabel: 'Python files',
       rsLabel: 'Rust files',
@@ -332,18 +297,6 @@ LESSONS.push({
       ],
       answer: 0,
       explain: 'Cargo treats a bare version as a <b>caret</b> requirement: compatible updates only. The exact version picked is stored in <code>Cargo.lock</code>. Write <code>"=1.0.200"</code> to pin it.',
-    },
-    {
-      type: 'choice',
-      q: 'You create <code>src/utils.rs</code> with <code>pub fn slug()</code>. In <code>main.rs</code>, <code>use utils::slug;</code> fails with "unresolved import". Why?',
-      options: [
-        '<code>main.rs</code> never declared <code>mod utils;</code>, so the file is not part of the crate',
-        'The file must be named <code>utils/mod.rs</code>',
-        'You need <code>cargo add utils</code>',
-        '<code>slug</code> must be inside a struct',
-      ],
-      answer: 0,
-      explain: 'A file only joins the crate through a <code>mod</code> line in its parent. Add <code>mod utils;</code> to <code>main.rs</code> and the <code>use</code> works.',
     },
     {
       type: 'output',

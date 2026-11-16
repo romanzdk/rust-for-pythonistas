@@ -18,14 +18,28 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦀</text></svg>">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
   <link rel="stylesheet" href="style.css">
+  <script>
+    // Apply a saved light/dark choice before the first paint, so the page never flashes the wrong theme.
+    try {
+      const t = localStorage.getItem('rfp-theme');
+      if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+    } catch {}
+  </script>
 </head>
 <body>
   <header class="topbar">
     <button id="menu" aria-label="Show lessons">☰ Lessons</button>
     <a href="#/">Rust for Pythonistas</a>
+    <span class="theme-slot"></span>
   </header>
   <aside id="nav"></aside>
   <main id="main"></main>
+  <footer class="site-foot">
+    Made by <a href="https://romanzdk.com" target="_blank" rel="noopener">Roman Žydyk</a> ·
+    <a href="https://github.com/romanzdk/rust-for-pythonistas" target="_blank" rel="noopener">Source on GitHub</a> ·
+    <a href="https://github.com/romanzdk/rust-for-pythonistas/issues/new/choose" target="_blank" rel="noopener">Report a mistake</a> ·
+    MIT license
+  </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
@@ -34,22 +48,25 @@
 
   <!-- Lessons appear in this order. scripts/check.mjs reads this list too. -->
   <script src="lib.js"></script>
-  <script src="lessons/01-basics.js"></script>
-  <script src="lessons/02-types.js"></script>
-  <script src="lessons/03-functions.js"></script>
-  <script src="lessons/04-control-flow.js"></script>
-  <script src="lessons/05-collections.js"></script>
-  <script src="lessons/06-iterators.js"></script>
-  <script src="lessons/07-structs.js"></script>
-  <script src="lessons/08-enums.js"></script>
-  <script src="lessons/09-option.js"></script>
-  <script src="lessons/10-result.js"></script>
-  <script src="lessons/11-ownership.js"></script>
-  <script src="lessons/12-traits.js"></script>
-  <script src="lessons/13-compiler-errors.js"></script>
-  <script src="lessons/14-real-code.js"></script>
-  <script src="lessons/15-cargo.js"></script>
-  <script src="lessons/16-testing-shipping.js"></script>
+  <script src="lessons/01-project.js"></script>
+  <script src="lessons/02-first-app.js"></script>
+  <script src="lessons/03-basics.js"></script>
+  <script src="lessons/04-types.js"></script>
+  <script src="lessons/05-functions.js"></script>
+  <script src="lessons/06-control-flow.js"></script>
+  <script src="lessons/07-collections.js"></script>
+  <script src="lessons/08-iterators.js"></script>
+  <script src="lessons/09-structs.js"></script>
+  <script src="lessons/10-enums.js"></script>
+  <script src="lessons/11-option.js"></script>
+  <script src="lessons/12-result.js"></script>
+  <script src="lessons/13-ownership.js"></script>
+  <script src="lessons/14-traits.js"></script>
+  <script src="lessons/15-compiler-errors.js"></script>
+  <script src="lessons/16-cli.js"></script>
+  <script src="lessons/17-cargo.js"></script>
+  <script src="lessons/18-testing-shipping.js"></script>
+  <script src="lessons/19-real-code.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

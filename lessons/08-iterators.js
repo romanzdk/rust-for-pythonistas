@@ -11,13 +11,13 @@ LESSONS.push({
     <ul>
       <li><code>.iter()</code> walks over a <code>Vec</code> but hands out <b>references</b> to the items, not the
       items themselves. That is why you see <code>*x</code>, <code>&amp;x</code> and <code>|&amp;x|</code> below.
-      Read <code>&amp;</code> as "borrowed" (lesson 11). One <code>*</code> gets you the value behind a reference.</li>
+      Read <code>&amp;</code> as "borrowed" (lesson 13). One <code>*</code> gets you the value behind a reference.</li>
       <li><code>|x| x * 2</code> is a <b>closure</b>: Python's <code>lambda x: x * 2</code>.</li>
       <li>A chain is <b>lazy</b>, like a generator: nothing runs until something asks for a value. <code>.collect()</code>,
       <code>.sum()</code> or a <code>for</code> loop asks for them.</li>
     </ul>
     <p>You will also meet <code>.into_iter()</code>. It hands out the items themselves and uses up the <code>Vec</code>
-    (lesson 11). <code>.iter()</code> is the one you will read most.</p>`,
+    (lesson 13). <code>.iter()</code> is the one you will read most.</p>`,
   examples: [
     {
       title: 'A comprehension becomes a chain',
@@ -78,7 +78,7 @@ LESSONS.push({
       `,
       links: [
         [3, 2, '<code>sum()</code> adds up the whole chain, like <code>sum(scores)</code>. It needs to know which number type to add: <code>i32</code> here. For a <code>Vec&lt;f64&gt;</code> you would write <code>f64</code> and get a float.'],
-        [4, 2, '<code>max()</code> returns an <code>Option</code>, because a list can be empty and then there is no maximum. <code>Some(12)</code> here. <code>unwrap()</code> takes the value out; lesson 9 covers Option.'],
+        [4, 2, '<code>max()</code> returns an <code>Option</code>, because a list can be empty and then there is no maximum. <code>Some(12)</code> here. <code>unwrap()</code> takes the value out; lesson 11 covers Option.'],
         [5, 2, '<code>min()</code> works the same way and also returns an <code>Option</code>.'],
         [7, 3, '<code>count()</code> counts the items the chain keeps, like <code>len([...])</code> or <code>sum(1 for ...)</code> in Python.'],
       ],
@@ -107,7 +107,7 @@ LESSONS.push({
         2. bob is 41
       `,
       links: [
-        [2, 1, 'A <code>Vec</code> of <code>&amp;str</code>: text literals, lesson 2.'],
+        [2, 1, 'A <code>Vec</code> of <code>&amp;str</code>: text literals, lesson 4.'],
         [4, 3, '<code>zip</code> walks two lists together and <code>enumerate</code> adds the index, exactly like Python. The <code>for</code> loop pulls one item at a time, so there is no <code>collect</code> here.'],
         [5, 4, '<code>i</code> starts at 0, so <code>i + 1</code> is Python\'s <code>start=1</code>. <code>name</code> and <code>age</code> are references, but the placeholders print them without a <code>*</code>.'],
       ],
@@ -297,7 +297,7 @@ LESSONS.push({
     ['lambda x: x * 2', '|x| x * 2'],
     ['def f(x):\n    print(x)\n    return x * 2', '|x| {\n    println!("{x}");\n    x * 2\n}'],
     ['sum(xs)', 'let total: i32 = xs.iter().sum();'],
-    ['max(xs), min(xs)', 'xs.iter().max(), xs.iter().min()  // Option, lesson 9'],
+    ['max(xs), min(xs)', 'xs.iter().max(), xs.iter().min()  // Option, lesson 11'],
     ['sum(1 for x in xs if x > 0)', 'xs.iter().filter(|x| **x > 0).count()'],
     ['for i, x in enumerate(xs):', 'for (i, x) in xs.iter().enumerate() {'],
     ['for x, y in zip(a, b):', 'for (x, y) in a.iter().zip(b.iter()) {'],
