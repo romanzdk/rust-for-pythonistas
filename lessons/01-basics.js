@@ -82,6 +82,13 @@ LESSONS.push({
       `,
       out: '15',
       rsError: 'error[E0384]: cannot assign twice to immutable variable `total`',
+      rsFix: code`
+        fn main() {
+            let mut total = 10;
+            total = total + 5;
+            println!("{total}");
+        }
+      `,
       links: [
         [2, 1, 'No <code>mut</code>, so <code>total</code> can never change...'],
         [3, 2, '...so assigning to it again is an error. The compiler suggests the fix: <code>let mut total = 10;</code>'],

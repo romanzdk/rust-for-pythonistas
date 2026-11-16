@@ -138,8 +138,27 @@ function exampleHTML(ex) {
       ${ex.out ? `<div class="output"><span>${ex.rsError ? 'Python prints' : ex.pyError ? 'Rust prints' : 'Both print'}</span><pre>${esc(ex.out)}</pre></div>` : ''}
       ${ex.pyError ? `<div class="output bad"><span>Python crashes at run time with</span><pre>${esc(ex.pyError)}</pre></div>` : ''}
       ${ex.rsError ? `<div class="output bad"><span>Rust compiler says</span><pre>${esc(ex.rsError)}</pre></div>` : ''}
+      ${fixHTML(ex)}
     </section>`,
   };
+}
+
+function fixHTML(ex) {
+  const fixOut = ex.fixOut ?? ex.out;
+  const fixes = [
+    ex.pyFix && { label: 'Python, fixed', src: ex.pyFix, lang: 'python', out: ex.pyFixOut ?? fixOut },
+    ex.rsFix && { label: 'Rust, fixed', src: ex.rsFix, lang: 'rust', out: fixOut },
+  ].filter(Boolean);
+  if (!fixes.length) return '';
+  return `<details class="fix"><summary>Show the fixed version</summary>
+    ${ex.fixNote ? `<p>${ex.fixNote}</p>` : ''}
+    <div class="pair">${fixes
+      .map(
+        (f) => `<figure class="panel"><figcaption>${f.label}${
+          f.lang === 'rust' ? `<a class="play" href="${playLink(f.src)}" target="_blank" rel="noopener">Open in Playground ↗</a>` : ''
+        }</figcaption>${codeBlock(f.src, f.lang)}${f.out ? `<div class="output fix-out"><span>Prints</span><pre>${esc(f.out)}</pre></div>` : ''}</figure>`,
+      )
+      .join('')}</div></details>`;
 }
 
 function wireExample(sec, links) {

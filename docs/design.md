@@ -30,8 +30,11 @@ This course starts from Python and aims at reading.
   renders a hash-routed page per lesson (`#/basics`).
 - Run sends code to `https://play.rust-lang.org/execute` (CORS is open) and compares stdout with `expected`.
 - Progress (solved exercises) and editor drafts are kept in `localStorage`. The site works without them.
-- Examples with `files: true` show files or commands (Cargo.toml, terminal) and are not run. Examples and exercises
-  with `test: true` are test modules; they must pass `rustc --test` (`cargo test` on the Playground).
+- Every example is run. Plain examples: Python and Rust must print `out`. Examples that fail on purpose
+  (`rsError`/`pyError`) must fail with that exact error and must have a fixed version (`rsFix`/`pyFix`) that runs.
+  Test examples run under pytest and `rustc --test`. File/command examples (`files: true`) carry a hidden `check`
+  script that runs the real tools (cargo, uv, pytest, maturin) on the shown files and commands. Only folder-tree
+  pictures (`diagram: true`) are not run.
 - `scripts/check.mjs` loads the same files as `index.html` and runs every Python/Rust snippet locally with `python3` and
   `rustc --edition 2024`. GitHub Actions runs it on each push. GitHub Pages serves `main` as-is.
 

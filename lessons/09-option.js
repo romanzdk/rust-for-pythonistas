@@ -95,6 +95,16 @@ LESSONS.push({
       `,
       out: '1',
       pyError: "TypeError: unsupported operand type(s) for +: 'NoneType' and 'int'",
+      pyFix: code`
+        def half(n):
+            if n % 2 == 0:
+                return n // 2
+            return None
+
+        n = 7
+        h = half(n)
+        print((h if h is not None else 0) + 1)
+      `,
       links: [
         [1, 1, 'The signature is what Python lacks here: <code>Option&lt;i32&gt;</code> says the result may be missing.'],
         [11, 7, '<code>unwrap_or(0)</code> turns the <code>Option</code> into a plain number. <code>Some(x)</code> becomes <code>x</code>, <code>None</code> becomes <code>0</code>.'],

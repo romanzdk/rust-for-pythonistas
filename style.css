@@ -219,3 +219,10 @@ pre.code { margin: 0; padding: 10px 0; overflow-x: auto; background: var(--code-
 .cheat code.inline { white-space: pre; }
 
 .pager { display: flex; justify-content: space-between; gap: 12px; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+.fix { margin-top: 10px; }
+.fix summary { cursor: pointer; color: var(--ok); font-weight: 600; }
+.fix > p { margin: 8px 0; }
+.fix .pair { margin-top: 8px; }
+.fix-out { margin: 0; border: 0; border-top: 1px solid var(--border); border-radius: 0; }
+.fix .pair:has(> :only-child) { grid-template-columns: 1fr; }

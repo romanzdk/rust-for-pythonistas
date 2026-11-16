@@ -204,6 +204,22 @@ LESSONS.push({
       `,
       out: 'go',
       rsError: 'error[E0004]: non-exhaustive patterns: `TrafficLight::Yellow` not covered',
+      rsFix: code`
+        enum TrafficLight {
+            Red,
+            Yellow,
+            Green,
+        }
+
+        fn main() {
+            let light = TrafficLight::Green;
+            match light {
+                TrafficLight::Red => println!("stop"),
+                TrafficLight::Yellow => println!("slow down"),
+                TrafficLight::Green => println!("go"),
+            }
+        }
+      `,
       links: [
         [1, 3, 'Three variants, so the compiler expects three options to be handled.'],
         [3, 4, '<code>Yellow</code> exists as a value, but no arm below mentions it.'],

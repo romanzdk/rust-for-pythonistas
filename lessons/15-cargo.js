@@ -14,6 +14,11 @@ LESSONS.push({
   examples: [
     {
       title: 'Starting and running a project',
+      check: code`
+        mkdir rs py
+        (cd rs && source "$RS")
+        (cd py && source "$PY")
+      `,
       text: `<p><code>cargo new</code> creates a ready-to-run project: <code>Cargo.toml</code>, a hello-world
       <code>src/main.rs</code>, a <code>.gitignore</code> and a git repository. There is no virtual environment to create
       or activate. Dependencies are downloaded and compiled into the project's <code>target/</code> folder.</p>`,
@@ -25,8 +30,8 @@ LESSONS.push({
       py: code`
         uv init shop
         cd shop
-        uv run main.py
-        uv run mypy .
+        uv run shop
+        uvx mypy .
       `,
       rs: code`
         cargo new shop
@@ -42,6 +47,7 @@ LESSONS.push({
     },
     {
       title: 'Where things live',
+      diagram: true,
       text: `<p>A typical crate next to a typical Python package. The biggest difference is in the last lines:
       Rust's build output goes to <code>target/</code>. It can be large, it is never committed, and you can delete it any time.</p>`,
       files: true,
@@ -93,6 +99,17 @@ LESSONS.push({
     },
     {
       title: 'Cargo.toml vs pyproject.toml',
+      check: code`
+        mkdir -p rs/src py/src/shop
+        cd rs
+        cp "$RS" Cargo.toml
+        echo 'fn main() {}' > src/main.rs
+        cargo metadata --format-version 1 > /dev/null
+        cd ../py
+        cp "$PY" pyproject.toml
+        printf 'def main():\n    pass\n' > src/shop/__main__.py
+        uv lock --quiet
+      `,
       text: `<p>Both are TOML files, and most sections match one to one. The one surprise is version strings: in Cargo,
       <code>"0.12"</code> does <b>not</b> mean exactly 0.12. It means "0.12 or any compatible update". Cargo follows
       semantic versioning by default, as if you always wrote Python's <code>~=</code>.</p>
@@ -148,6 +165,16 @@ LESSONS.push({
     },
     {
       title: 'Modules are files, but only when you say so',
+      check: code`
+        mkdir rs py
+        cd rs
+        split_files "$RS"
+        printf '[package]\nname = "shop"\nversion = "0.1.0"\nedition = "2024"\n' > Cargo.toml
+        cargo run --quiet
+        cd ../py
+        split_files "$PY"
+        PYTHONPATH=src python3 -m shop
+      `,
       text: `<p>In Python, every <code>.py</code> file inside a package can be imported. In Rust, a file only becomes part of
       the crate when its parent <b>declares</b> it with <code>mod name;</code>. So when you read a crate, start at
       <code>main.rs</code> or <code>lib.rs</code> and follow the <code>mod</code> lines. They are the table of contents.
@@ -172,6 +199,9 @@ LESSONS.push({
         # src/shop/__main__.py
         from shop.models import Order
         from shop.payments.stripe import charge
+
+        order = Order()
+        charge(250)
       `,
       rs: code`
         // src/models.rs
@@ -193,6 +223,11 @@ LESSONS.push({
 
         use models::Order;
         use payments::stripe::charge;
+
+        fn main() {
+            let _order = Order {};
+            charge(250);
+        }
       `,
       links: [
         [2, 2, '<code>pub</code>, or nothing outside <code>models.rs</code> could use <code>Order</code>.'],
@@ -206,6 +241,11 @@ LESSONS.push({
     },
     {
       title: 'Adding and updating dependencies',
+      check: code`
+        mkdir rs py
+        (cd rs && cargo new --quiet shop && cd shop && source "$RS")
+        (cd py && uv init --quiet shop && cd shop && source "$PY")
+      `,
       text: `<p><code>cargo add</code> edits <code>Cargo.toml</code> for you. <code>Cargo.lock</code> records the exact
       versions that were picked, just like <code>uv.lock</code>. Commit it, so everyone (and CI) builds the same thing.
       <code>cargo update</code> moves the lock file forward within the ranges in <code>Cargo.toml</code>.</p>`,
@@ -237,6 +277,18 @@ LESSONS.push({
     },
     {
       title: 'Workspaces: several crates in one repository',
+      check: code`
+        mkdir rs py
+        cd rs
+        cp "$RS" Cargo.toml
+        cargo new --quiet --lib crates/shop-core
+        echo 'serde = { workspace = true }' >> crates/shop-core/Cargo.toml
+        cargo metadata --format-version 1 > /dev/null
+        cd ../py
+        cp "$PY" pyproject.toml
+        uv init --quiet --lib packages/shop-core
+        uv lock --quiet
+      `,
       text: `<p>Bigger projects split their code into several crates in one repository, a <b>workspace</b>. All members
       share one <code>Cargo.lock</code> and one <code>target/</code> folder. This is the same idea as a uv workspace.
       When the root <code>Cargo.toml</code> has a <code>[workspace]</code> section, look at <code>members</code> to find the
@@ -377,7 +429,7 @@ LESSONS.push({
   },
   cheat: [
     ['uv init shop', 'cargo new shop'],
-    ['uv run main.py', 'cargo run'],
+    ['uv run shop', 'cargo run'],
     ['mypy .', 'cargo check'],
     ['pyproject.toml / uv.lock', 'Cargo.toml / Cargo.lock'],
     ['[project] dependencies = [...]', '[dependencies]'],

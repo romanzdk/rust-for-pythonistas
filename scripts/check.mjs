@@ -1,5 +1,7 @@
-// Checks every lesson: structure, Python and Rust outputs, quiz answers, and exercise solutions.
+// Checks every lesson: structure, Python and Rust outputs, quiz answers, exercise solutions, and the
+// file/command examples (by running the real cargo/uv/pytest/maturin tools on them).
 // Usage: node scripts/check.mjs [lesson-id ...]
+// Needs rustc + cargo (stable, edition 2024), python3, uv, and network access for the file/command examples.
 import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -19,9 +21,9 @@ const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'rfp-'));
 const normalize = (s) => s.split('\n').map((l) => l.trimEnd()).join('\n').trim();
 let jobId = 0;
 
-function exec(cmd, args, input) {
+function exec(cmd, args, input, opts = {}) {
   return new Promise((resolve) => {
-    const child = execFile(cmd, args, { timeout: 20000, maxBuffer: 1 << 22 }, (err, stdout, stderr) =>
+    const child = execFile(cmd, args, { timeout: 20000, maxBuffer: 1 << 24, ...opts }, (err, stdout, stderr) =>
       resolve({ ok: !err, stdout, stderr }),
     );
     // A program that exits without reading stdin closes the pipe first; that EPIPE is harmless.
@@ -41,7 +43,28 @@ async function rust(src, test = false) {
 }
 
 const python = (src) => exec('python3', ['-I', '-'], src);
-const run = (src, lang) => (lang === 'python' ? python(src) : rust(src));
+const run = (src, lang, test) => (lang === 'python' ? python(src) : rust(src, test));
+
+async function pytest(src) {
+  const file = path.join(tmp, `test_p${jobId++}.py`);
+  fs.writeFileSync(file, src);
+  return exec('uvx', ['--quiet', 'pytest', '-q', '-p', 'no:cacheprovider', file], '', { timeout: 300000 });
+}
+
+// Runs an example's hidden `check` script in an empty folder. $RS and $PY point to the shown Rust and Python text;
+// split_files writes a "// path" / "# path" separated listing out as real files.
+const PREAMBLE = String.raw`set -euo pipefail
+split_files() { awk '/^(\/\/|#) [^ ]+\.[A-Za-z]+$/ { f = $2; d = f; if (sub(/\/[^\/]*$/, "", d)) system("mkdir -p " d); next } f { print > f }' "$1"; }
+`;
+async function shell(script, ex) {
+  const dir = fs.mkdtempSync(path.join(tmp, 'sh-'));
+  const work = path.join(dir, 'work');
+  fs.mkdirSync(work);
+  fs.writeFileSync(path.join(dir, 'shown.rs.txt'), ex.rs + '\n');
+  fs.writeFileSync(path.join(dir, 'shown.py.txt'), ex.py + '\n');
+  const env = { ...process.env, RS: path.join(dir, 'shown.rs.txt'), PY: path.join(dir, 'shown.py.txt') };
+  return exec('bash', ['-c', PREAMBLE + script], '', { cwd: work, env, timeout: 900000 });
+}
 
 // Run up to N async checks at once; rustc is the slow part.
 async function pool(tasks, n = os.cpus().length) {
@@ -69,16 +92,40 @@ for (const l of lessons) {
       for (const p of py == null ? [] : [].concat(py)) if (!(p >= 1 && p <= lineCount(ex.py))) fail(`${w}: link Python line ${p} is out of range`);
       if (!note) fail(`${w}: link on Rust line ${rs} has no note`);
     }
-    if (ex.files) return; // shows files or commands, nothing to run
-    if (ex.test) {
-      // Rust side is a test module: `cargo test` must pass. Python side (pytest style) must at least run.
+    if (ex.files) {
+      if (ex.diagram) return; // a picture (like a folder tree), not code
+      if (!ex.check) return fail(`${w}: a files example needs a "check" script (or diagram: true)`);
       tasks.push(async () => {
-        const [p, r] = await Promise.all([python(ex.py), rust(ex.rs, true)]);
-        if (!p.ok) fail(`${w}: Python failed\n${p.stderr}`);
+        const r = await shell(ex.check, ex);
+        if (!r.ok) fail(`${w}: check script failed\n${r.stdout.slice(-3000)}${r.stderr.slice(-3000)}`);
+      });
+      return;
+    }
+    if (ex.test) {
+      // Both sides are test files: pytest and `cargo test` must pass.
+      tasks.push(async () => {
+        const [p, r] = await Promise.all([pytest(ex.py), rust(ex.rs, true)]);
+        if (!p.ok) fail(`${w}: pytest fails\n${p.stdout}${p.stderr}`);
         if (!r.ok) fail(`${w}: Rust tests fail\n${r.stdout}${r.stderr}`);
       });
       return;
     }
+    if (ex.rsError && !ex.rsFix) fail(`${w}: an example that does not compile needs an rsFix`);
+    if (ex.pyError && !ex.pyFix) fail(`${w}: an example where Python crashes needs a pyFix`);
+    const fixOut = ex.fixOut ?? ex.out;
+    if (ex.rsFix)
+      tasks.push(async () => {
+        const r = await rust(ex.rsFix);
+        if (!r.ok) fail(`${w}: rsFix failed\n${r.stderr}`);
+        else if (fixOut !== undefined && normalize(r.stdout) !== normalize(fixOut)) fail(`${w}: rsFix printed\n${r.stdout}\nexpected\n${fixOut}`);
+      });
+    if (ex.pyFix)
+      tasks.push(async () => {
+        const r = await python(ex.pyFix);
+        const want = ex.pyFixOut ?? fixOut;
+        if (!r.ok) fail(`${w}: pyFix failed\n${r.stderr}`);
+        else if (want !== undefined && normalize(r.stdout) !== normalize(want)) fail(`${w}: pyFix printed\n${r.stdout}\nexpected\n${want}`);
+      });
     tasks.push(async () => {
       const r = await python(ex.py);
       if (ex.pyError) {
@@ -106,10 +153,22 @@ for (const l of lessons) {
       tasks.push(async () => {
         const r = await rust(q.code, q.test);
         if (r.compiled !== q.answer) fail(`${w}: answer says compiles=${q.answer}, rustc says ${r.compiled}\n${r.stderr}`);
+        else if (r.compiled && !r.ok) fail(`${w}: compiles but fails when run\n${r.stdout}${r.stderr}`);
       });
     } else if (q.type === 'output' || q.type === 'choice') {
       if (!Array.isArray(q.options) || !(q.answer >= 0 && q.answer < q.options.length)) return fail(`${w}: answer index out of range`);
       if (new Set(q.options).size !== q.options.length) fail(`${w}: duplicate options`);
+      if (q.type === 'choice' && q.code) {
+        const lang = q.lang || 'rust';
+        if (lang === 'plaintext') return; // shows text like an error message, not code
+        const src = q.harness ? q.harness.replace('{code}', q.code) : q.code;
+        tasks.push(async () => {
+          const r = await run(src, lang, q.test);
+          if (q.rsError) {
+            if (r.compiled || !r.stderr.includes(q.rsError)) fail(`${w}: code should fail with "${q.rsError}"\n${r.stderr}`);
+          } else if (!r.ok) fail(`${w}: code fails (use "harness" for fragments, "rsError" for expected errors)\n${r.stderr}`);
+        });
+      }
       if (q.type === 'output')
         tasks.push(async () => {
           const r = await run(q.code, q.lang);
