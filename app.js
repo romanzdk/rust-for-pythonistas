@@ -1,0 +1,338 @@
+const PLAYGROUND = 'https://play.rust-lang.org';
+const main = document.getElementById('main');
+const nav = document.getElementById('nav');
+
+const store = {
+  get(key, fallback) {
+    try {
+      const v = localStorage.getItem(key);
+      return v === null ? fallback : JSON.parse(v);
+    } catch {
+      return fallback;
+    }
+  },
+  set(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {}
+  },
+  del(key) {
+    try {
+      localStorage.removeItem(key);
+    } catch {}
+  },
+};
+
+const solved = () => new Set(store.get('rfp-solved', []));
+function markSolved(id) {
+  store.set('rfp-solved', [...solved().add(id)]);
+  renderNav();
+}
+
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const normalize = (s) => s.split('\n').map((l) => l.trimEnd()).join('\n').trim();
+const playLink = (src) => `${PLAYGROUND}/?version=stable&mode=debug&edition=2024&code=${encodeURIComponent(src)}`;
+
+// Highlight the whole snippet (so multi-line strings/comments stay correct), then split it into
+// lines, re-opening any <span> that was still open at a line break.
+function highlightLines(src, lang) {
+  const html = window.hljs ? hljs.highlight(src, { language: lang, ignoreIllegals: true }).value : esc(src);
+  const lines = [];
+  const open = [];
+  let cur = '';
+  for (const part of html.split(/(<span[^>]*>|<\/span>|\n)/)) {
+    if (part === '\n') {
+      lines.push(cur + '</span>'.repeat(open.length));
+      cur = open.join('');
+    } else if (part.startsWith('<span')) {
+      open.push(part);
+      cur += part;
+    } else if (part === '</span>') {
+      open.pop();
+      cur += part;
+    } else {
+      cur += part;
+    }
+  }
+  lines.push(cur + '</span>'.repeat(open.length));
+  return lines;
+}
+
+function codeBlock(src, lang, side = '', marked = new Set()) {
+  const lines = highlightLines(src, lang)
+    .map((h, i) => {
+      const n = i + 1;
+      const m = marked.has(n);
+      return `<div class="ln${m ? ' marked' : ''}" data-n="${n}"${m ? ' tabindex="0"' : ''}><span class="num">${n}</span><code>${h || ' '}</code></div>`;
+    })
+    .join('');
+  return `<pre class="code" data-side="${side}"><div class="lines">${lines}</div></pre>`;
+}
+
+const inlineCode = (src, lang) => `<code class="inline">${window.hljs ? hljs.highlight(src, { language: lang, ignoreIllegals: true }).value : esc(src)}</code>`;
+
+function renderNav() {
+  const current = location.hash.replace(/^#\/?/, '');
+  const done = solved();
+  nav.innerHTML =
+    `<a class="brand" href="#/">Rust <span>for</span> Pythonistas</a>` +
+    `<p class="progress">${done.size} / ${LESSONS.length} exercises solved</p><ol>` +
+    LESSONS.map(
+      (l) =>
+        `<li><a href="#/${l.id}"${l.id === current ? ' aria-current="page"' : ''}>${esc(l.title)}${done.has(l.id) ? ' <span class="check" title="Exercise solved">✓</span>' : ''}</a></li>`,
+    ).join('') +
+    '</ol>';
+}
+
+function renderHome() {
+  document.title = 'Rust for Pythonistas';
+  const done = solved();
+  const next = LESSONS.find((l) => !done.has(l.id)) || LESSONS[0];
+  const label = done.size ? `Continue: ${esc(next.title)}` : 'Start lesson 1';
+  main.innerHTML = `
+    <section class="hero">
+      <p class="eyebrow">A course for people who already know Python</p>
+      <h1>Learn to read Rust using the Python you already know</h1>
+      <p class="lead">Every idea is shown twice, as Python you would write and as the Rust that does the same thing, side by side.
+      The goal is modest on purpose: read Rust code and make small, safe changes to it. You won't write large programs here.</p>
+      <p><a class="button primary" href="#/${next.id}">${label} →</a></p>
+    </section>
+    <section class="how">
+      <div><b>1 · Side by side</b><p>Python next to Rust. Hover a marked Rust line to see the matching Python line and a short note.</p></div>
+      <div><b>2 · Read it</b><p>Short questions: what does this print, does it compile, what type is this? No running, just reading.</p></div>
+      <div><b>3 · Change it</b><p>A small edit to real Rust code. Press Run and it compiles on the official Rust Playground.</p></div>
+      <div><b>4 · Cheat card</b><p>One table with the Python on the left and the Rust on the right, so you can look things up later.</p></div>
+    </section>
+    <h2>Lessons</h2>
+    <ol class="cards">${LESSONS.map(
+      (l, i) => `<li><a href="#/${l.id}"><span class="num">${i + 1}</span><b>${esc(l.title)}${done.has(l.id) ? ' <span class="check">✓</span>' : ''}</b><span>${esc(l.summary)}</span></a></li>`,
+    ).join('')}</ol>
+    ${done.size ? '<p class="muted"><button class="link" id="reset-progress">Reset my progress</button></p>' : ''}`;
+  const reset = document.getElementById('reset-progress');
+  if (reset)
+    reset.onclick = () => {
+      store.del('rfp-solved');
+      LESSONS.forEach((l) => store.del(`rfp-draft-${l.id}`));
+      route();
+    };
+}
+
+function exampleHTML(ex) {
+  const links = (ex.links || []).map(([rs, py, note]) => ({ rs, py: py == null ? [] : [].concat(py), note }));
+  const rsMarked = new Set(links.map((l) => l.rs));
+  const pyMarked = new Set(links.flatMap((l) => l.py));
+  return {
+    links,
+    html: `
+    <section class="example">
+      <h3>${esc(ex.title)}</h3>
+      ${ex.text ? `<div class="prose">${ex.text}</div>` : ''}
+      <div class="pair">
+        <figure class="panel"><figcaption>Python</figcaption>${codeBlock(ex.py, 'python', 'py', pyMarked)}</figure>
+        <figure class="panel"><figcaption>Rust ${ex.rsError ? '<span class="badge bad">does not compile</span>' : ''}
+          <a class="play" href="${playLink(ex.rs)}" target="_blank" rel="noopener">Open in Playground ↗</a></figcaption>
+          ${codeBlock(ex.rs, 'rust', 'rs', rsMarked)}</figure>
+      </div>
+      ${links.length ? '<div class="note" aria-live="polite"><p class="muted">Hover over or tap a <span class="marker">marked</span> line to see what it means.</p></div>' : ''}
+      ${ex.out ? `<div class="output"><span>${ex.rsError ? 'Python prints' : ex.pyError ? 'Rust prints' : 'Both print'}</span><pre>${esc(ex.out)}</pre></div>` : ''}
+      ${ex.pyError ? `<div class="output bad"><span>Python crashes at run time with</span><pre>${esc(ex.pyError)}</pre></div>` : ''}
+      ${ex.rsError ? `<div class="output bad"><span>Rust compiler says</span><pre>${esc(ex.rsError)}</pre></div>` : ''}
+    </section>`,
+  };
+}
+
+function wireExample(sec, links) {
+  if (!links.length) return;
+  const note = sec.querySelector('.note');
+  const find = (side, nums) => nums.map((n) => sec.querySelector(`.code[data-side="${side}"] .ln[data-n="${n}"]`)).filter(Boolean);
+  const show = (e) => {
+    const ln = e.target.closest('.ln.marked');
+    if (!ln) return;
+    const side = ln.closest('.code').dataset.side;
+    const n = Number(ln.dataset.n);
+    const hits = links.filter((l) => (side === 'rs' ? l.rs === n : l.py.includes(n)));
+    sec.querySelectorAll('.ln.lit').forEach((el) => el.classList.remove('lit'));
+    hits.forEach((l) => [...find('rs', [l.rs]), ...find('py', l.py)].forEach((el) => el.classList.add('lit')));
+    note.innerHTML = hits.map((l) => `<p><b>Rust line ${l.rs}${l.py.length ? ` ↔ Python line ${l.py.join(', ')}` : ''}:</b> ${l.note}</p>`).join('');
+  };
+  sec.addEventListener('mouseover', show);
+  sec.addEventListener('focusin', show);
+  sec.addEventListener('click', show);
+}
+
+function quizHTML(q, k) {
+  const options = q.type === 'compiles' ? ['Yes, it compiles', 'No, it does not compile'] : q.options;
+  const answer = q.type === 'compiles' ? (q.answer ? 0 : 1) : q.answer;
+  const opt = (o) => (q.type === 'output' ? `<pre>${esc(o)}</pre>` : o);
+  return `
+    <div class="quiz" data-answer="${answer}">
+      <p class="q"><span class="qn">Q${k + 1}.</span> ${q.q}</p>
+      ${q.code ? codeBlock(q.code, q.lang || 'rust') : ''}
+      <div class="options">${options.map((o, j) => `<button data-j="${j}">${opt(o)}</button>`).join('')}</div>
+      <div class="explain" hidden>${q.explain}</div>
+    </div>`;
+}
+
+function wireQuiz(el) {
+  const answer = Number(el.dataset.answer);
+  el.querySelectorAll('.options button').forEach((b) => {
+    b.onclick = () => {
+      const right = Number(b.dataset.j) === answer;
+      el.querySelectorAll('.options button').forEach((o) => {
+        o.disabled = true;
+        if (Number(o.dataset.j) === answer) o.classList.add('right');
+      });
+      if (!right) b.classList.add('wrong');
+      const ex = el.querySelector('.explain');
+      ex.hidden = false;
+      ex.insertAdjacentHTML('afterbegin', `<b>${right ? 'Correct!' : 'Not quite.'}</b> `);
+    };
+  });
+}
+
+async function runRust(src) {
+  const res = await fetch(`${PLAYGROUND}/execute`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ channel: 'stable', mode: 'debug', edition: '2024', crateType: 'bin', tests: false, backtrace: false, code: src }),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+const cleanStderr = (s) =>
+  s
+    .split('\n')
+    .filter((l) => !/^\s*(Compiling|Finished|Running) /.test(l))
+    .join('\n')
+    .trim();
+
+function wireExercise(lesson) {
+  const ex = lesson.exercise;
+  const key = `rfp-draft-${lesson.id}`;
+  const ta = document.getElementById('editor');
+  ta.value = store.get(key, ex.starter);
+  const run = () => document.getElementById('run').click();
+  const ed = window.CodeMirror
+    ? CodeMirror.fromTextArea(ta, {
+        mode: 'rust',
+        lineNumbers: true,
+        indentUnit: 4,
+        viewportMargin: Infinity,
+        extraKeys: { 'Ctrl-Enter': run, 'Cmd-Enter': run, Tab: (cm) => cm.replaceSelection('    ') },
+      })
+    : { getValue: () => ta.value, setValue: (v) => (ta.value = v), on: (_, f) => ta.addEventListener('input', f) };
+  ed.on('change', () => store.set(key, ed.getValue()));
+
+  const result = document.getElementById('result');
+  const btn = document.getElementById('run');
+  btn.onclick = async () => {
+    btn.disabled = true;
+    result.className = 'result';
+    result.innerHTML = '<p class="muted">Compiling on the Rust Playground… (usually a few seconds)</p>';
+    const src = ed.getValue();
+    try {
+      const r = await runRust(src);
+      const out = normalize(r.stdout);
+      const err = cleanStderr(r.stderr);
+      if (r.success && out === normalize(ex.expected)) {
+        result.className = 'result ok';
+        result.innerHTML = `<p><b>✅ Solved!</b> The output matches. ${nextLink(lesson)}</p><pre>${esc(out)}</pre>`;
+        markSolved(lesson.id);
+      } else if (r.success) {
+        result.className = 'result warn';
+        result.innerHTML = `<p><b>It compiles and runs, but the output is different.</b></p>
+          <div class="cmp"><div><span>Your output</span><pre>${esc(out) || '(nothing)'}</pre></div>
+          <div><span>Expected</span><pre>${esc(normalize(ex.expected))}</pre></div></div>`;
+      } else {
+        result.className = 'result bad';
+        result.innerHTML = `<p><b>It didn't compile, or it crashed.</b> Read the first error from the top. It usually names the line and often suggests the fix.</p>
+          ${out ? `<pre>${esc(out)}</pre>` : ''}<pre class="stderr">${esc(err)}</pre>`;
+      }
+    } catch (e) {
+      result.className = 'result bad';
+      result.innerHTML = `<p><b>Couldn't reach the Rust Playground</b> (${esc(e.message)}). Check your connection, or
+        <a href="${playLink(src)}" target="_blank" rel="noopener">open this code in the Playground ↗</a> and compare the output yourself.</p>`;
+    } finally {
+      btn.disabled = false;
+    }
+  };
+  document.getElementById('reset').onclick = () => {
+    ed.setValue(ex.starter);
+    result.innerHTML = '';
+  };
+  document.getElementById('solution').onclick = () => {
+    if (confirm('Replace your code with the solution?')) ed.setValue(ex.solution);
+  };
+  const hint = document.getElementById('hint');
+  if (hint) hint.onclick = () => (document.getElementById('hint-text').hidden = false);
+}
+
+function nextLink(lesson) {
+  const i = LESSONS.indexOf(lesson);
+  const n = LESSONS[i + 1];
+  return n ? `<a href="#/${n.id}">Next lesson: ${esc(n.title)} →</a>` : '<a href="#/">Back to all lessons</a>';
+}
+
+function renderLesson(i) {
+  const l = LESSONS[i];
+  document.title = `${l.title} · Rust for Pythonistas`;
+  const examples = l.examples.map(exampleHTML);
+  const prev = LESSONS[i - 1];
+  const next = LESSONS[i + 1];
+  main.innerHTML = `
+    <article class="lesson">
+      <p class="eyebrow">Lesson ${i + 1} of ${LESSONS.length}</p>
+      <h1>${esc(l.title)}</h1>
+      <div class="prose intro">${l.intro}</div>
+
+      <h2><span class="step">1</span> Side by side</h2>
+      ${examples.map((e) => e.html).join('')}
+
+      <h2><span class="step">2</span> Read it</h2>
+      <p class="muted">Answer by reading the code. Don't run it.</p>
+      ${l.quiz.map(quizHTML).join('')}
+
+      <h2><span class="step">3</span> Change it</h2>
+      <div class="exercise">
+        <div class="prose">${l.exercise.task}</div>
+        <div class="output"><span>Expected output</span><pre>${esc(l.exercise.expected)}</pre></div>
+        <div class="editor-wrap"><textarea id="editor" spellcheck="false" aria-label="Rust code editor"></textarea></div>
+        <div class="actions">
+          <button class="primary" id="run" title="Ctrl/Cmd + Enter">▶ Run</button>
+          <button id="reset">Reset</button>
+          ${l.exercise.hint ? '<button id="hint">Hint</button>' : ''}
+          <button id="solution">Show solution</button>
+        </div>
+        ${l.exercise.hint ? `<p class="hint" id="hint-text" hidden>💡 ${l.exercise.hint}</p>` : ''}
+        <div id="result" class="result" aria-live="polite"></div>
+      </div>
+
+      <h2><span class="step">4</span> Cheat card</h2>
+      <div class="table-wrap"><table class="cheat"><thead><tr><th>Python</th><th>Rust</th></tr></thead><tbody>
+        ${l.cheat.map(([py, rs]) => `<tr><td>${inlineCode(py, 'python')}</td><td>${inlineCode(rs, 'rust')}</td></tr>`).join('')}
+      </tbody></table></div>
+
+      <nav class="pager">
+        ${prev ? `<a href="#/${prev.id}">← ${esc(prev.title)}</a>` : '<a href="#/">← All lessons</a>'}
+        ${next ? `<a href="#/${next.id}">${esc(next.title)} →</a>` : '<a href="#/">All lessons →</a>'}
+      </nav>
+    </article>`;
+  main.querySelectorAll('.example').forEach((sec, k) => wireExample(sec, examples[k].links));
+  main.querySelectorAll('.quiz').forEach(wireQuiz);
+  wireExercise(l);
+}
+
+function route() {
+  const id = location.hash.replace(/^#\/?/, '');
+  const i = LESSONS.findIndex((l) => l.id === id);
+  if (i < 0) renderHome();
+  else renderLesson(i);
+  renderNav();
+  document.body.classList.remove('nav-open');
+  window.scrollTo(0, 0);
+}
+
+document.getElementById('menu').onclick = () => document.body.classList.toggle('nav-open');
+window.addEventListener('hashchange', route);
+route();

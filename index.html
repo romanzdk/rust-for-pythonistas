@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rust for Pythonistas</title>
+  <meta name="description" content="Learn to read Rust and make small changes to it, using the Python you already know. Side-by-side examples, quizzes and runnable exercises.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦀</text></svg>">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <button id="menu" aria-label="Show lessons">☰ Lessons</button>
+    <a href="#/">Rust for Pythonistas</a>
+  </header>
+  <aside id="nav"></aside>
+  <main id="main"></main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/mode/simple.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/rust/rust.min.js"></script>
+
+  <!-- Lessons appear in this order. scripts/check.mjs reads this list too. -->
+  <script src="lib.js"></script>
+  <script src="lessons/01-basics.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
