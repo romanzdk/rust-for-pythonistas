@@ -24,7 +24,9 @@ function exec(cmd, args, input) {
     const child = execFile(cmd, args, { timeout: 20000, maxBuffer: 1 << 22 }, (err, stdout, stderr) =>
       resolve({ ok: !err, stdout, stderr }),
     );
-    if (input !== undefined) child.stdin.end(input);
+    // A program that exits without reading stdin closes the pipe first; that EPIPE is harmless.
+    child.stdin.on('error', () => {});
+    child.stdin.end(input);
   });
 }
 
