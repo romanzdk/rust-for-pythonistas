@@ -1,0 +1,24 @@
+name: Something in a lesson is wrong
+description: A wrong explanation, a confusing note, a broken example or a quiz answer you disagree with.
+labels: [content]
+body:
+  - type: input
+    id: lesson
+    attributes:
+      label: Lesson
+      description: The lesson title or its link.
+      placeholder: "Ownership and borrowing (https://romanzdk.github.io/rust-for-pythonistas/#/ownership)"
+    validations:
+      required: true
+  - type: textarea
+    id: where
+    attributes:
+      label: Where and what
+      description: Which example, question or exercise, and what is wrong.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What it should say instead
+      description: Optional, but very helpful.

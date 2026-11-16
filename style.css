@@ -165,13 +165,13 @@ pre.code { margin: 0; padding: 10px 0; overflow-x: auto; background: var(--code-
 .example { margin-bottom: 36px; }
 
 /* syntax colors (highlight.js + CodeMirror) */
-.hljs-keyword, .hljs-selector-tag, .cm-keyword { color: var(--k); }
-.hljs-string, .hljs-regexp, .cm-string { color: var(--s); }
-.hljs-number, .hljs-literal, .cm-number, .cm-atom { color: var(--n); }
-.hljs-comment, .cm-comment { color: var(--c); font-style: italic; }
-.hljs-title, .hljs-function .hljs-title, .cm-def { color: var(--f); }
-.hljs-type, .hljs-class .hljs-title, .hljs-built_in, .cm-variable-3, .cm-type, .cm-builtin { color: var(--t); }
-.hljs-meta, .hljs-symbol, .hljs-attr, .hljs-section, .cm-meta, .cm-variable-2 { color: var(--m); }
+.hljs-keyword, .hljs-selector-tag, .CodeMirror .cm-keyword { color: var(--k); }
+.hljs-string, .hljs-regexp, .CodeMirror .cm-string { color: var(--s); }
+.hljs-number, .hljs-literal, .CodeMirror .cm-number, .CodeMirror .cm-atom { color: var(--n); }
+.hljs-comment, .CodeMirror .cm-comment { color: var(--c); font-style: italic; }
+.hljs-title, .hljs-function .hljs-title, .CodeMirror .cm-def { color: var(--f); }
+.hljs-type, .hljs-class .hljs-title, .hljs-built_in, .CodeMirror .cm-variable-3, .CodeMirror .cm-type, .CodeMirror .cm-builtin { color: var(--t); }
+.hljs-meta, .hljs-symbol, .hljs-attr, .hljs-section, .CodeMirror .cm-meta, .CodeMirror .cm-variable-2 { color: var(--m); }
 
 /* quiz */
 .quiz { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin: 14px 0; }
@@ -226,3 +226,4 @@ pre.code { margin: 0; padding: 10px 0; overflow-x: auto; background: var(--code-
 .fix .pair { margin-top: 8px; }
 .fix-out { margin: 0; border: 0; border-top: 1px solid var(--border); border-radius: 0; }
 .fix .pair:has(> :only-child) { grid-template-columns: 1fr; }
+.CodeMirror .cm-variable, .CodeMirror .cm-property, .CodeMirror .cm-operator { color: var(--text); }

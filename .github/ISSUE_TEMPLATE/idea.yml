@@ -1,0 +1,16 @@
+name: Lesson or topic idea
+description: Something a Python developer needs to read Rust that the course doesn't cover yet.
+labels: [idea]
+body:
+  - type: textarea
+    id: topic
+    attributes:
+      label: Topic
+      description: What should the course explain? Where did you run into it?
+    validations:
+      required: true
+  - type: textarea
+    id: python
+    attributes:
+      label: The Python side
+      description: Optional. What would be the closest Python idea to compare it with?
