@@ -116,7 +116,8 @@ main { margin-left: 270px; padding: 32px 40px 80px; max-width: 1180px; }
   background: var(--surface); color: var(--text); text-decoration: none;
 }
 .cards a:hover { border-color: var(--accent); }
-.cards .num { grid-row: span 2; color: var(--accent); font-weight: 700; font-size: 1.2rem; }
+.cards a { align-content: start; }
+.cards .num { grid-row: span 2; width: auto; padding: 0; text-align: left; opacity: 1; color: var(--accent); font-weight: 700; font-size: 1.2rem; }
 .cards a > span:last-child { color: var(--muted); font-size: 0.9rem; }
 
 /* buttons */
@@ -159,7 +160,8 @@ pre.code { margin: 0; padding: 10px 0; overflow-x: auto; background: var(--code-
 .output { margin-top: 10px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
 .output > span, .cmp span { display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); padding: 4px 12px; background: var(--surface); border-bottom: 1px solid var(--border); }
 .output pre, .cmp pre { margin: 0; padding: 8px 12px; background: var(--code-bg); overflow-x: auto; }
-.output.bad pre { color: var(--bad); }
+.output.bad > span { color: var(--bad); }
+.output.bad pre { font-size: 13px; }
 .example { margin-bottom: 36px; }
 
 /* syntax colors (highlight.js + CodeMirror) */

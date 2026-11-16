@@ -28,12 +28,12 @@ function exec(cmd, args, input) {
   });
 }
 
-async function rust(src) {
+async function rust(src, test = false) {
   const id = jobId++;
   const file = path.join(tmp, `p${id}.rs`);
   const bin = path.join(tmp, `p${id}`);
   fs.writeFileSync(file, src);
-  const c = await exec('rustc', ['--edition', '2024', '-A', 'warnings', '-o', bin, file]);
+  const c = await exec('rustc', ['--edition', '2024', '-A', 'warnings', ...(test ? ['--test'] : []), '-o', bin, file]);
   if (!c.ok) return { compiled: false, ok: false, stdout: '', stderr: c.stderr };
   return { compiled: true, ...(await exec(bin, [], '')) };
 }
@@ -67,6 +67,16 @@ for (const l of lessons) {
       for (const p of py == null ? [] : [].concat(py)) if (!(p >= 1 && p <= lineCount(ex.py))) fail(`${w}: link Python line ${p} is out of range`);
       if (!note) fail(`${w}: link on Rust line ${rs} has no note`);
     }
+    if (ex.files) return; // shows files or commands, nothing to run
+    if (ex.test) {
+      // Rust side is a test module: `cargo test` must pass. Python side (pytest style) must at least run.
+      tasks.push(async () => {
+        const [p, r] = await Promise.all([python(ex.py), rust(ex.rs, true)]);
+        if (!p.ok) fail(`${w}: Python failed\n${p.stderr}`);
+        if (!r.ok) fail(`${w}: Rust tests fail\n${r.stdout}${r.stderr}`);
+      });
+      return;
+    }
     tasks.push(async () => {
       const r = await python(ex.py);
       if (ex.pyError) {
@@ -77,7 +87,10 @@ for (const l of lessons) {
     tasks.push(async () => {
       const r = await rust(ex.rs);
       if (ex.rsError) {
-        if (r.compiled || !r.stderr.includes(ex.rsError)) fail(`${w}: Rust should fail to compile with "${ex.rsError}"\n${r.stderr}`);
+        // rsError may be the full compiler output; its "error..." and "help:..." lines must appear in rustc's stderr.
+        const key = ex.rsError.split('\n').filter((s) => /^(error|help)/.test(s));
+        const missing = key.filter((s) => !r.stderr.includes(s));
+        if (r.compiled || !key.length || missing.length) fail(`${w}: Rust should fail to compile with:\n${missing.join('\n') || ex.rsError}\n--- rustc said:\n${r.stderr}`);
       } else if (!r.ok) fail(`${w}: Rust failed\n${r.stderr}`);
       else if (ex.out !== undefined && normalize(r.stdout) !== normalize(ex.out)) fail(`${w}: Rust printed\n${r.stdout}\nexpected\n${ex.out}`);
     });
@@ -89,7 +102,7 @@ for (const l of lessons) {
     if (q.type === 'compiles') {
       if (typeof q.answer !== 'boolean' || !q.code) return fail(`${w}: "compiles" needs code and a true/false answer`);
       tasks.push(async () => {
-        const r = await rust(q.code);
+        const r = await rust(q.code, q.test);
         if (r.compiled !== q.answer) fail(`${w}: answer says compiles=${q.answer}, rustc says ${r.compiled}\n${r.stderr}`);
       });
     } else if (q.type === 'output' || q.type === 'choice') {
@@ -106,13 +119,19 @@ for (const l of lessons) {
 
   const ex = l.exercise;
   if (ex) {
-    for (const f of ['task', 'starter', 'solution', 'expected']) if (!ex[f]) fail(`exercise: missing "${f}"`);
-    tasks.push(async () => {
+    for (const f of ['task', 'starter', 'solution', ...(ex.test ? [] : ['expected'])]) if (!ex[f]) fail(`exercise: missing "${f}"`);
+    if (ex.test)
+      tasks.push(async () => {
+        const [sol, start] = await Promise.all([rust(ex.solution, true), rust(ex.starter, true)]);
+        if (!sol.ok) fail(`exercise: solution tests fail\n${sol.stdout}${sol.stderr}`);
+        if (start.ok) fail('exercise: the starter tests already pass');
+      });
+    else tasks.push(async () => {
       const r = await rust(ex.solution);
       if (!r.ok) fail(`exercise: solution failed\n${r.stderr}`);
       else if (normalize(r.stdout) !== normalize(ex.expected)) fail(`exercise: solution printed\n${r.stdout}\nexpected\n${ex.expected}`);
     });
-    tasks.push(async () => {
+    if (!ex.test) tasks.push(async () => {
       const r = await rust(ex.starter);
       if (r.ok && normalize(r.stdout) === normalize(ex.expected)) fail('exercise: the starter code already prints the expected output');
     });

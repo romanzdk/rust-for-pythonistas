@@ -30,6 +30,8 @@ This course starts from Python and aims at reading.
   renders a hash-routed page per lesson (`#/basics`).
 - Run sends code to `https://play.rust-lang.org/execute` (CORS is open) and compares stdout with `expected`.
 - Progress (solved exercises) and editor drafts are kept in `localStorage`. The site works without them.
+- Examples with `files: true` show files or commands (Cargo.toml, terminal) and are not run. Examples and exercises
+  with `test: true` are test modules; they must pass `rustc --test` (`cargo test` on the Playground).
 - `scripts/check.mjs` loads the same files as `index.html` and runs every Python/Rust snippet locally with `python3` and
   `rustc --edition 2024`. GitHub Actions runs it on each push. GitHub Pages serves `main` as-is.
 
@@ -48,4 +50,6 @@ This course starts from Python and aims at reading.
 11. Ownership and borrowing
 12. Traits (duck typing / Protocols)
 13. Reading compiler errors
-14. Reading real code (modules, `use`, `Cargo.toml`, attributes, recognizing lifetimes)
+14. Reading real code (modules, `use`, attributes, recognizing lifetimes, a realistic program)
+15. Cargo projects and Cargo.toml (layout, dependencies, features, modules as files, workspaces)
+16. Tests, builds and shipping (`#[test]`, `cargo test` output, doc tests, release builds, crates.io, PyO3 + maturin)
