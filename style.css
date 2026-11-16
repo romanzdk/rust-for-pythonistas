@@ -312,3 +312,22 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   code, pre, .CodeMirror, .editor-wrap textarea, .options pre, .output.bad pre { font-size: 12.5px; }
   .num { width: 2.2em; padding-right: 0.7em; }
 }
+
+/* error index, review, report links */
+.err-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin: 16px 0; scroll-margin-top: 70px; }
+.err-card h3 { margin: 0 0 8px; font-size: 1.05rem; }
+.err-card h3 code { color: var(--bad); }
+.err-card > p { margin: 6px 0; }
+.err-card .pair { margin: 10px 0; }
+.review-item { margin: 18px 0; }
+.review-item .from { margin: 0 0 -8px; font-size: 0.85rem; }
+.review-score { font-weight: 600; font-size: 1.1rem; }
+.report { margin: 8px 0 0; text-align: right; font-size: 0.85rem; }
+.report a, .report-lesson a { color: var(--muted); }
+.report a:hover, .report-lesson a:hover { color: var(--accent); }
+.report-lesson { margin-top: 40px; color: var(--muted); }
+.tools-line { margin-top: -8px; }
+
+/* Long inline code (no spaces) may break anywhere instead of pushing the page sideways on phones. */
+p code, li code, h3 code, .options button { overflow-wrap: anywhere; }
+figcaption { flex-wrap: wrap; overflow-wrap: anywhere; }

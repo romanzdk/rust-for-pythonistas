@@ -17,7 +17,8 @@ phrasebook page (`#/phrasebook`) collects all cheat cards in one searchable tabl
 - Goal: after the course, a Python developer can read typical Rust (structs, enums, `match`, `Option`/`Result`,
   `?`, borrowing, traits, iterators) and make small edits guided by compiler errors.
 - Goal: everything shown is correct. Every snippet is run in CI (`scripts/check.mjs`).
-- Non-goal: async, unsafe, macros by example, writing lifetimes. These are only mentioned so readers can recognize them.
+- Non-goal: unsafe, macros by example, writing lifetimes. These are only mentioned so readers can recognize them.
+  (Async was a non-goal at first; lesson 24 now covers reading it, because most real services and CLIs use it.)
 - Anti-goal: a long theory course. Each lesson stays short and has a concrete Python comparison.
 
 ## Approaches considered
@@ -81,3 +82,25 @@ language, then what real projects need.
     different things on purpose)
 22. Threads without a GIL (`thread::spawn`, `Arc<Mutex<T>>`, `Send`, `thread::scope`, channels). Thread examples
     are written so their output never depends on timing: results are joined in order, counted under a lock, or sorted.
+
+**Real-world Rust**
+23. The crates you'll meet everywhere (serde, anyhow, thiserror, clap). Programs that use these crates are built in a
+    shared Cargo project by the checker; the Playground has them too.
+24. async/await vs asyncio (tokio, `join!`, `spawn`, timeouts, `select!`)
+25. Rust inside Python with PyO3 (checked by building real wheels with maturin and importing them)
+26. Reading real projects: excerpts from uv, ruff and pydantic-core, pinned to a commit and checked against GitHub
+    (`excerpt`)
+
+## Tools and pages
+
+- `#/phrasebook`: all cheat cards in one searchable table.
+- `#/errors`: the error index (`errors.js`), each entry checked like a lesson example.
+- `#/review`: random questions from lessons the reader has opened (kept in `localStorage`).
+- Every example and lesson has a "report a mistake" link that opens a GitHub issue already filled in with the lesson.
+
+## Deployment
+
+GitHub Actions runs `scripts/check.mjs` on every push. On `main`, a second job runs `scripts/build-pages.mjs`, which
+copies the static files and adds one real page per lesson (`/ownership/`, ...) with its own title, description and the
+lesson text in the HTML, plus `sitemap.xml`, so search engines can index each lesson. Those pages start the same app
+on that lesson. The result is deployed to GitHub Pages. Locally, `index.html` still works on its own, with no build.

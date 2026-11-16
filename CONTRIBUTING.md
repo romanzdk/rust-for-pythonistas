@@ -65,6 +65,10 @@ LESSONS.push({
     check: code`bash`,               // runs in an empty folder; $RS / $PY hold the shown text, and
                                      // split_files "$RS" writes a "// path"-separated listing out as files
     diagram: true,                   // a picture such as a folder tree; nothing to run
+
+    // Real code from another project instead of a program. rs must be exactly those lines (checked against GitHub);
+    // py only has to parse, unless you also give out:
+    excerpt: { repo: 'astral-sh/uv', commit: '<full 40-character SHA>', path: 'crates/x/src/lib.rs', from: 10, to: 30 },
   }],
   quiz: [
     { type: 'output', q: 'What does this print?', code: code`...`, options: ['a', 'b'], answer: 0, explain: '...' },
@@ -85,6 +89,15 @@ LESSONS.push({
 
 `code` is a template tag that keeps backslashes as written and removes the common indentation. Write a backtick
 inside it as `` \` ``.
+
+Rust programs that use serde, serde_json, anyhow, thiserror, clap or tokio are built in a shared Cargo project
+automatically (the versions are in `CARGO_TOML` in `scripts/check.mjs`). The Rust Playground has these crates too.
+
+### The error index
+
+`errors.js` holds the entries of the error index (`#/errors`): the error code and message, the lesson that explains
+it, what Python would do, a small program `rs` that must fail with exactly that error, and a `fix` that must print
+`out`. `node scripts/check.mjs errors` checks only the index.
 
 ## Pull requests
 
