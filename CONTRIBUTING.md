@@ -53,6 +53,7 @@ LESSONS.push({
                                      // its error/help lines are checked). Then rsFix is required.
     pyError: 'TypeError: ...',       // Python must crash with this text. Then pyFix is required.
     rsFix: code`...`, pyFix: code`...`,  // the working version, shown under "Show the fixed version"
+    pyOut: code`...`,                // Python prints something else on purpose (then out is what Rust prints)
     fixOut: code`...`,               // what the fixes print, if different from out
     fixNote: 'HTML',                 // a sentence shown above the fixes
     test: true,                      // both sides are test files: pytest and `cargo test` must pass

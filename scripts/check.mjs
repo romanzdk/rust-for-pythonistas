@@ -159,7 +159,10 @@ for (const l of lessons) {
       if (ex.pyError) {
         if (r.ok || !r.stderr.includes(ex.pyError)) fail(`${w}: Python should fail with "${ex.pyError}"\n${r.stderr}`);
       } else if (!r.ok) fail(`${w}: Python failed\n${r.stderr}`);
-      else if (ex.out !== undefined && normalize(r.stdout) !== normalize(ex.out)) fail(`${w}: Python printed\n${r.stdout}\nexpected\n${ex.out}`);
+      else {
+        const want = ex.pyOut ?? ex.out;
+        if (want !== undefined && normalize(r.stdout) !== normalize(want)) fail(`${w}: Python printed\n${r.stdout}\nexpected\n${want}`);
+      }
     });
     tasks.push(async () => {
       const r = await rust(ex.rs);
