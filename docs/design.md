@@ -88,7 +88,10 @@ language, then what real projects need.
     shared Cargo project by the checker; the Playground has them too.
 24. async/await vs asyncio (tokio, `join!`, `spawn`, timeouts, `select!`)
 25. Rust inside Python with PyO3 (checked by building real wheels with maturin and importing them)
-26. Reading real projects: excerpts from uv, ruff and pydantic-core, pinned to a commit and checked against GitHub
+26. Reading function signatures (generics and bounds, `impl Trait`, `dyn` and closures, lifetimes in depth)
+27. Reading macros and attributes (format macros checked at compile time, `#[derive]`, attribute macros vs decorators,
+    `macro_rules!`)
+28. Reading real projects: excerpts from uv, ruff and pydantic-core, pinned to a commit and checked against GitHub
     (`excerpt`)
 
 ## Tools and pages

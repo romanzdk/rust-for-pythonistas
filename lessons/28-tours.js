@@ -149,7 +149,7 @@ LESSONS.push({
         maybe -> Input should be a valid boolean, unable to interpret input
       `,
       links: [
-        [1, 1, `Read the signature in pieces. <code>&lt;'py&gt;</code> is a lifetime (lesson 19), tied to Python's interpreter.
+        [1, 1, `Read the signature in pieces. <code>&lt;'py&gt;</code> is a lifetime (lesson 26), tied to Python's interpreter.
           <code>impl Input&lt;'py&gt;</code> means "any type that implements the <code>Input</code> trait" (lesson 14): a Python
           object, a JSON value or a string. <code>?Sized</code> also allows types like <code>str</code> behind the
           <code>&amp;</code>. <code>ValResult&lt;bool&gt;</code> is pydantic-core's short name for
@@ -267,7 +267,7 @@ LESSONS.push({
           the first character, so it's an error. <code>Some(b'-' | b'_' | b'.')</code>: the one before was punctuation too, so
           do nothing. That is how a run like <code>__</code> becomes a single <code>-</code>.`],
         [27, 21, `<code>_</code> catches everything else, like <code>case _</code> (lesson 10).`],
-        [33, 25, `<code>matches!(value, pattern)</code> is a <code>match</code> that only answers true or false.`],
+        [33, 25, `<code>matches!(value, pattern)</code> is a <code>match</code> that only answers true or false (lesson 27).`],
         [37, 28, `The happy ending: <code>Ok</code> with the new string.`],
       ],
     },
@@ -428,8 +428,8 @@ LESSONS.push({
       `,
       links: [
         [1, 7, `<code>impl&lt;S: ContainsRecursionState&gt;</code>: these methods work for any state type <code>S</code> that
-          implements the <code>ContainsRecursionState</code> trait (generics with a bound, lessons 14 and 19).
-          <code>'_</code> is a lifetime the compiler fills in by itself (lesson 19).`],
+          implements the <code>ContainsRecursionState</code> trait (generics with a bound, lessons 14 and 26).
+          <code>'_</code> is a lifetime the compiler fills in by itself (lesson 26).`],
         [5, 8, `<code>new</code> returns a <code>Result</code>: a guard, or a <code>RecursionError</code> saying why not. The
           guard holds <code>&amp;mut S</code>: it borrows the state and may change it (lesson 13).`],
         [6, null, `<code>access_recursion_state</code> takes a closure (lesson 8) and calls it with the real state. Here the
