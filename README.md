@@ -10,7 +10,7 @@ A free, interactive course: Python and Rust side by side, quizzes, and exercises
 
 [![check](https://github.com/romanzdk/rust-for-pythonistas/actions/workflows/check.yml/badge.svg)](https://github.com/romanzdk/rust-for-pythonistas/actions/workflows/check.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-![26 lessons](https://img.shields.io/badge/lessons-26-orange)
+![28 lessons](https://img.shields.io/badge/lessons-28-orange)
 ![Rust edition 2024](https://img.shields.io/badge/Rust-edition_2024-b7410e?logo=rust)
 ![Python 3.12+](https://img.shields.io/badge/Python-3.12%2B-3776ab?logo=python&logoColor=white)
 
@@ -95,7 +95,9 @@ Examples that fail on purpose show the real compiler error, and you can open the
 | 23 | [The crates you'll meet everywhere](https://romanzdk.github.io/rust-for-pythonistas/#/crates) | serde instead of `json` and pydantic, anyhow and thiserror for errors, clap instead of argparse |
 | 24 | [async/await vs asyncio](https://romanzdk.github.io/rust-for-pythonistas/#/async) | `async fn`, `.await`, tokio, `join!` vs `gather`, tasks, timeouts |
 | 25 | [Rust inside Python with PyO3](https://romanzdk.github.io/rust-for-pythonistas/#/pyo3) | A Python module written in Rust: functions, type conversions, exceptions, classes, the GIL |
-| 26 | [Reading real projects](https://romanzdk.github.io/rust-for-pythonistas/#/tours) | Real code from uv, ruff and pydantic-core, read line by line next to Python |
+| 26 | [Reading function signatures](https://romanzdk.github.io/rust-for-pythonistas/#/signatures) | Generics and bounds, `impl Trait`, `dyn` and closures, lifetimes, and how to read any signature piece by piece |
+| 27 | [Reading macros and attributes](https://romanzdk.github.io/rust-for-pythonistas/#/macros) | Why `println!` has a `!`, `#[derive]` vs `@dataclass`, attributes vs decorators, everyday macros, `macro_rules!` |
+| 28 | [Reading real projects](https://romanzdk.github.io/rust-for-pythonistas/#/tours) | Real code from uv, ruff and pydantic-core, read line by line next to Python |
 
 **Tools**
 
