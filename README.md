@@ -148,4 +148,4 @@ The design notes are in [docs/design.md](docs/design.md).
 
 ## License
 
-[MIT](LICENSE) © Roman Žydyk
+[MIT](LICENSE) © [Roman Žydyk](https://romanzdk.com)
