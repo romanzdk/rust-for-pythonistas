@@ -67,7 +67,7 @@ LESSONS.push({
     diagram: true,                   // a picture such as a folder tree; nothing to run
 
     // Real code from another project instead of a program. rs must be exactly those lines (checked against GitHub);
-    // py only has to parse, unless you also give out:
+    // py only has to parse, unless you also give out. Also list it, with its license text, in THIRD_PARTY_NOTICES:
     excerpt: { repo: 'astral-sh/uv', commit: '<full 40-character SHA>', path: 'crates/x/src/lib.rs', from: 10, to: 30 },
   }],
   quiz: [
