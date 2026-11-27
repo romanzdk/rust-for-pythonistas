@@ -185,6 +185,16 @@ function renderHome() {
     };
 }
 
+function renderNotFound(id) {
+  document.title = 'Lesson not found · Rust for Pythonistas';
+  main.innerHTML = `
+    <section class="hero">
+      <h1>Lesson not found</h1>
+      <p class="lead">There is no lesson at <code>#/${esc(id)}</code>.</p>
+      <p><a class="button primary" href="#/">← Back to the start page</a></p>
+    </section>`;
+}
+
 const reportLink = (l, where) => {
   const n = LESSONS.indexOf(l) + 1;
   const body = `**Lesson:** ${n}. ${l.title} (${SITE}#/${l.id})\n\n**Where and what:** ${where}: \n\n**What it should say instead** (optional):\n`;
@@ -585,7 +595,8 @@ function route() {
   if (id === 'phrasebook') renderPhrasebook();
   else if (page === 'errors') renderErrors(sub);
   else if (id === 'review') renderReview();
-  else if (i < 0) renderHome();
+  else if (!id) renderHome();
+  else if (i < 0) renderNotFound(id);
   else renderLesson(i);
   renderNav();
   document.body.classList.remove('nav-open');

@@ -275,6 +275,8 @@ h3.part { margin: 28px 0 0; color: var(--accent); font-size: 0.85rem; text-trans
 .site-foot { margin-left: 270px; padding: 20px 40px 40px; max-width: 1180px; color: var(--muted); font-size: 0.9rem; border-top: 1px solid var(--border); }
 .site-foot a { color: var(--muted); }
 .site-foot a:hover { color: var(--accent); }
+/* Vertical padding on inline links enlarges the tap target to 24px without moving the text. */
+.why a, .how a, .tools-line a, .site-foot a, .nav-foot .links a { padding-block: 4px; }
 .hero .button + .button { margin-left: 8px; }
 @media (max-width: 860px) { .site-foot { margin-left: 0; padding: 20px 16px 32px; } }
 .topbar #menu { white-space: nowrap; }
