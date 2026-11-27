@@ -25,7 +25,10 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 const strip = (s) => String(s).replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
 const pre = (label, src) => `<figure><figcaption>${esc(label)}</figcaption><pre><code>${esc(src)}</code></pre></figure>`;
 
-function page({ slug, title, description, body }) {
+// JSON for a <script> tag: "<" escaped so text in it can never close the tag.
+const ldJson = (data) => `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`;
+
+function page({ slug, title, description, body, head = '' }) {
   const url = slug ? `${SITE}${slug}/` : SITE;
   const set = (s, re, value) => {
     if (!re.test(s)) throw new Error(`index.html: ${re} not found`);
@@ -39,6 +42,7 @@ function page({ slug, title, description, body }) {
   s = set(s, /<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${esc(title)}">`);
   s = set(s, /<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${esc(description)}">`);
   s = set(s, /<meta property="og:url" content="[^"]*">/, `<meta property="og:url" content="${url}">`);
+  if (head) s = set(s, /<\/head>/, `${head}\n</head>`);
   if (slug) s = set(s, /<body>/, `<body data-page="${slug}">`);
   s = set(s, /<main id="main"><\/main>/, `<main id="main">${body}</main>`);
   const file = path.join(out, slug, 'index.html');
@@ -56,6 +60,19 @@ urls.push(
     description: 'Learn to read Rust and make small changes to it, using the Python you already know. Side-by-side examples, quizzes and runnable exercises.',
     body: `<h1>Learn to read Rust using the Python you already know</h1><ol>${lessonLinks}</ol>
       <p><a href="phrasebook/">Python → Rust phrasebook</a> · <a href="errors/">Rust compiler error index</a></p>`,
+    head: ldJson({
+      '@context': 'https://schema.org',
+      '@type': 'Course',
+      name: 'Rust for Pythonistas',
+      description: 'Learn to read Rust and make small changes to it, using the Python you already know.',
+      url: SITE,
+      inLanguage: 'en',
+      isAccessibleForFree: true,
+      educationalLevel: 'Beginner',
+      teaches: 'Reading and changing Rust code, for Python developers',
+      provider: { '@type': 'Person', name: 'Roman Žydyk', url: 'https://romanzdk.com' },
+      hasPart: LESSONS.map((l) => ({ '@type': 'LearningResource', name: strip(l.title), url: `${SITE}${l.id}/` })),
+    }),
   }),
 );
 
@@ -91,6 +108,15 @@ urls.push(
       (e) => `<section><h2>error[${e.code}]: ${esc(e.message)}</h2><p>In Python: ${e.python}</p><p>${e.why}</p>${pre('Does not compile', e.rs)}${pre('Fixed', e.fix)}</section>`,
     ).join('')}`,
   }),
+);
+
+// GitHub Pages serves this for any missing URL, at any depth: absolute base, not indexed, the app shows the course start.
+fs.writeFileSync(
+  path.join(out, '404.html'),
+  html
+    .replace('<meta charset="utf-8">', '<meta charset="utf-8">\n  <base href="/rust-for-pythonistas/">\n  <meta name="robots" content="noindex">')
+    .replace(/<title>[^<]*<\/title>/, '<title>Page not found · Rust for Pythonistas</title>')
+    .replace(/\s*<link rel="canonical" href="[^"]*">/, ''),
 );
 
 fs.writeFileSync(path.join(out, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?>
