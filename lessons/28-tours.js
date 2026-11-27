@@ -8,13 +8,14 @@ LESSONS.push({
     <ul>
       <li><a href="https://github.com/astral-sh/uv" target="_blank" rel="noopener">uv</a>, the package manager
         (<a href="https://github.com/astral-sh/uv/blob/57f7f6835992a7403512ce71d32b7cf7a45510dd/LICENSE-MIT" target="_blank" rel="noopener">MIT</a>
-        or <a href="https://github.com/astral-sh/uv/blob/57f7f6835992a7403512ce71d32b7cf7a45510dd/LICENSE-APACHE" target="_blank" rel="noopener">Apache-2.0</a> license),</li>
+        or <a href="https://github.com/astral-sh/uv/blob/57f7f6835992a7403512ce71d32b7cf7a45510dd/LICENSE-APACHE" target="_blank" rel="noopener">Apache-2.0</a> license, © Astral Software Inc.),</li>
       <li><a href="https://github.com/astral-sh/ruff" target="_blank" rel="noopener">ruff</a>, the linter
-        (<a href="https://github.com/astral-sh/ruff/blob/0222c19dd8e0c9a927f2e47bf3774a108431da25/LICENSE" target="_blank" rel="noopener">MIT</a> license),</li>
+        (<a href="https://github.com/astral-sh/ruff/blob/0222c19dd8e0c9a927f2e47bf3774a108431da25/LICENSE" target="_blank" rel="noopener">MIT</a> license, © Charles Marsh),</li>
       <li><a href="https://github.com/pydantic/pydantic-core" target="_blank" rel="noopener">pydantic-core</a>, the engine
         inside pydantic (<a href="https://github.com/pydantic/pydantic-core/blob/383eb95a19433754c0cecf7025b50c26b6d97a36/LICENSE" target="_blank" rel="noopener">MIT</a>
         license, © Samuel Colvin).</li>
     </ul>
+    <p>The full license texts are in <a href="https://github.com/romanzdk/rust-for-pythonistas/blob/main/THIRD_PARTY_NOTICES" target="_blank" rel="noopener">THIRD_PARTY_NOTICES</a>.</p>
     <p>Each excerpt is pinned to one commit, and <b>View on GitHub</b> opens exactly those lines, so you can scroll
     around and see the rest of the file. Next to it is the Python you would write for the same job. You won't know
     every name, and that's normal in real code: read the shape, use the hover notes, and guess the rest from the names.</p>`,
